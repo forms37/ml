@@ -99,9 +99,23 @@
         </table>
     </div>
 
-    <!-- Registro y Dashboard iguales que antes -->
-    <div id="registro" class="tab"><h2>Registro Mensual</h2><p>...</p></div>
-    <div id="dashboard" class="tab"><h2>Dashboard</h2><p>...</p></div>
+    <!-- Registro Mensual -->
+    <div id="registro" class="tab">
+        <h2>Registro Mensual</h2>
+        <table id="tablaRegistro">
+            <thead><tr><th>Actividad</th><th>Proyecto</th><th>Meta</th><th>Realizado</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="tab">
+        <h2>Dashboard</h2>
+        <table id="tablaDashboard">
+            <thead><tr><th>Actividad</th><th>Meta</th><th>Realizado</th><th>Progreso</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
     <script>
         // --- VARIABLES ---
@@ -109,21 +123,25 @@
         let proyectos = JSON.parse(localStorage.getItem("proyectos")) || [];
         let actividades = JSON.parse(localStorage.getItem("actividades")) || [];
         let tareas = JSON.parse(localStorage.getItem("tareas")) || [];
+        let registros = JSON.parse(localStorage.getItem("registros")) || [];
 
         function guardarDatos() {
             localStorage.setItem("personas", JSON.stringify(personas));
             localStorage.setItem("proyectos", JSON.stringify(proyectos));
             localStorage.setItem("actividades", JSON.stringify(actividades));
             localStorage.setItem("tareas", JSON.stringify(tareas));
+            localStorage.setItem("registros", JSON.stringify(registros));
         }
 
         function showTab(tab) {
             document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
             document.getElementById(tab).classList.add("active");
+            if (tab === "registro") actualizarTablaRegistro();
+            if (tab === "dashboard") actualizarDashboard();
             actualizarSelects();
         }
 
-        // --- PERSONAS ---
+        // ---------------- PERSONAS ----------------
         function agregarPersona() {
             const nombre = document.getElementById("nombrePersona").value.trim();
             if (!nombre) return alert("Ingrese un nombre");
@@ -155,7 +173,7 @@
             actualizarSelects();
         }
 
-        // --- PROYECTOS ---
+        // ---------------- PROYECTOS ----------------
         function agregarProyecto() {
             const personaId = +document.getElementById("personaProyecto").value;
             const nombre = document.getElementById("nombreProyecto").value.trim();
@@ -189,7 +207,7 @@
             actualizarSelects();
         }
 
-        // --- ACTIVIDADES ---
+        // ---------------- ACTIVIDADES ----------------
         function agregarActividad() {
             const proyectoId = +document.getElementById("proyectoActividad").value;
             const nombre = document.getElementById("nombreActividad").value.trim();
@@ -229,7 +247,7 @@
             actualizarSelects();
         }
 
-        // --- TAREAS ---
+        // ---------------- TAREAS ----------------
         function agregarTarea() {
             const actividadId = +document.getElementById("actividadTarea").value;
             const nombre = document.getElementById("nombreTarea").value.trim();
@@ -271,7 +289,49 @@
             actualizarSelects();
         }
 
-        // --- ACTUALIZAR SELECTS ---
+        // ---------------- REGISTRO MENSUAL ----------------
+        function actualizarTablaRegistro() {
+            const tbody = document.querySelector("#tablaRegistro tbody");
+            tbody.innerHTML = "";
+            actividades.forEach(a => {
+                const proyecto = proyectos.find(x => x.id === a.proyectoId);
+                const reg = registros.find(r => r.actividadId === a.id);
+                const valor = reg ? reg.realizado : 0;
+                tbody.innerHTML += `<tr>
+                  <td>${a.nombre}</td>
+                  <td>${proyecto ? proyecto.nombre : ""}</td>
+                  <td>${a.meta}</td>
+                  <td>
+                    <input type="number" value="${valor}" onchange="guardarRegistro(${a.id}, this.value)">
+                  </td></tr>`;
+            });
+        }
+        function guardarRegistro(actividadId, valor) {
+            let reg = registros.find(r => r.actividadId === actividadId);
+            if (reg) reg.realizado = +valor;
+            else registros.push({actividadId, realizado: +valor});
+            guardarDatos();
+        }
+
+        // ---------------- DASHBOARD ----------------
+        function actualizarDashboard() {
+            const tbody = document.querySelector("#tablaDashboard tbody");
+            tbody.innerHTML = "";
+            actividades.forEach(a => {
+                const reg = registros.find(r => r.actividadId === a.id);
+                const realizado = reg ? reg.realizado : 0;
+                const porcentaje = a.meta > 0 ? Math.min(100, Math.round((realizado / a.meta) * 100)) : 0;
+                tbody.innerHTML += `<tr>
+                  <td>${a.nombre}</td>
+                  <td>${a.meta}</td>
+                  <td>${realizado}</td>
+                  <td>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${porcentaje}%">${porcentaje}%</div></div>
+                  </td></tr>`;
+            });
+        }
+
+        // ---------------- SELECTS ----------------
         function actualizarSelects() {
             const selPersona = document.getElementById("personaProyecto");
             if (selPersona) {
