@@ -523,9 +523,11 @@
       
       try {
         const formData = new FormData(e.target);
+        
+        // URL de Google Apps Script configurada
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzEq4VV0pkyJg7-eUs8SDWq9PjN1dSxsMq777Lx7mP6kYjf5nIkLDezp_jLMvw20Z5aA/exec";
 
-        // Simular envío (reemplaza con tu URL de Apps Script)
-        const response = await fetch("TU_URL_DE_APPS_SCRIPT", {
+        const response = await fetch(APPS_SCRIPT_URL, {
           method: "POST",
           body: formData
         });
@@ -540,13 +542,7 @@
             title: '¡Registro exitoso!',
             text: 'La campaña ha sido registrada correctamente',
             confirmButtonText: 'Continuar',
-            confirmButtonColor: '#fdd835',
-            showClass: {
-              popup: 'animate__animated animate__fadeInDown'
-            },
-            hideClass: {
-              popup: 'animate__animated animate__fadeOutUp'
-            }
+            confirmButtonColor: '#fdd835'
           });
           
           // Limpiar formulario
@@ -559,13 +555,24 @@
           throw new Error('Error en el servidor');
         }
       } catch (error) {
-        // Mostrar mensaje de error
+        console.error('Error:', error);
+        
+        // Mostrar mensaje de error específico
+        let errorMessage = 'Hubo un problema al registrar la campaña.';
+        
+        if (error.message === 'URL de Apps Script no configurada') {
+          errorMessage = 'Necesitas configurar la URL de Google Apps Script en el código.';
+        } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          errorMessage = 'Error de conexión. Verifica tu conexión a internet.';
+        }
+        
         await Swal.fire({
           icon: 'error',
           title: 'Error al enviar',
-          text: 'Hubo un problema al registrar la campaña. Por favor, intenta nuevamente.',
+          text: errorMessage,
           confirmButtonText: 'Reintentar',
-          confirmButtonColor: '#f44336'
+          confirmButtonColor: '#f44336',
+          footer: '<small>Si el problema persiste, contacta al administrador del sistema</small>'
         });
       } finally {
         // Remover estado de carga
