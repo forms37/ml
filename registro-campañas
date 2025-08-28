@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Campañas</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #fffde7 0%, #fff9c4 100%);
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #fdd835 0%, #fbc02d 100%);
+      color: #333;
+      padding: 30px;
+      margin-bottom: 30px;
+      text-align: center;
+      border-radius: 15px 15px 0 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255,255,255,0.1) 10px,
+        rgba(255,255,255,0.1) 20px
+      );
+      animation: shimmer 20s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .header h2 {
+      font-size: 2.2em;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-container {
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 0 0 15px 15px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(253, 216, 53, 0.2);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      position: relative;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: #fafafa;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #fdd835;
+      background: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(253, 216, 53, 0.3);
+    }
+
+    input:valid, select:valid, textarea:valid {
+      border-color: #4caf50;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 12px center;
+      background-repeat: no-repeat;
+      background-size: 16px;
+      padding-right: 45px;
+      appearance: none;
+    }
+
+    optgroup {
+      font-weight: bold;
+      color: #fbc02d;
+      background: #fffde7;
+    }
+
+    option {
+      padding: 8px;
+      color: #333;
+    }
+
+    .submit-section {
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 2px solid #f0f0f0;
+    }
+
+    .whatsapp-notice {
+      background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      border-left: 5px solid #ff9800;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .whatsapp-notice::before {
+      content: '📷';
+      font-size: 24px;
+      position: absolute;
+      top: 15px;
+      left: 15px;
+    }
+
+    .whatsapp-notice p {
+      margin-left: 45px;
+      color: #d84315;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .btn-whatsapp {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+      margin-left: 45px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      color: white;
+      font-weight: 600;
+      border-radius: 25px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    }
+
+    .btn-whatsapp:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+    }
+
+    .btn-whatsapp::before {
+      content: '💬';
+      font-size: 18px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #fdd835 0%, #fbc02d 100%);
+      color: #333;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: left 0.5s;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(253, 216, 53, 0.4);
+    }
+
+    .submit-btn:hover::before {
+      left: 100%;
+    }
+
+    .submit-btn:active {
+      transform: translateY(-1px);
+    }
+
+    /* Loading spinner */
+    .loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid #333;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .header h2 {
+        font-size: 1.8em;
+      }
+      
+      .form-container {
+        padding: 25px;
+      }
+      
+      body {
+        padding: 10px;
+      }
+    }
+
+    /* Floating labels effect */
+    .floating-label {
+      position: relative;
+    }
+
+    .floating-label input,
+    .floating-label select,
+    .floating-label textarea {
+      padding-top: 20px;
+    }
+
+    .floating-label label {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      color: #666;
+      text-transform: none;
+    }
+
+    .floating-label input:focus + label,
+    .floating-label input:valid + label,
+    .floating-label select:focus + label,
+    .floating-label select:valid + label,
+    .floating-label textarea:focus + label,
+    .floating-label textarea:valid + label {
+      top: 5px;
+      font-size: 12px;
+      color: #fdd835;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* Success animation */
+    @keyframes successPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .success-animation {
+      animation: successPulse 0.6s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Registro de Campañas</h2>
+    </div>
+    
+    <div class="form-container">
+      <form id="registroForm" method="POST" enctype="multipart/form-data">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="oficina">Oficina Regional</label>
+            <select name="oficina" id="oficina" required>
+              <option value="">-- Selecciona Oficina --</option>
+              <option value="CENTRO">CENTRO</option>
+              <option value="CUSCO">CUSCO</option>
+              <option value="LIMA">LIMA</option>
+              <option value="NORTE">NORTE</option>
+              <option value="ORIENTE">ORIENTE</option>
+              <option value="PUNO">PUNO</option>
+              <option value="SAN MARTÍN">SAN MARTÍN</option>
+              <option value="SUR">SUR</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="establecimiento">Establecimiento de Medio Libre</label>
+            <select name="establecimiento" id="establecimiento" required>
+              <option value="">-- Selecciona Establecimiento --</option>
+              <optgroup label="CENTRO">
+                <option value="EML AYACUCHO">EML AYACUCHO</option>
+                <option value="EML CHANCHAMAYO">EML CHANCHAMAYO</option>
+                <option value="EML HUANCAVELICA">EML HUANCAVELICA</option>
+                <option value="EML HUANCAYO">EML HUANCAYO</option>
+                <option value="EML LA OROYA">EML LA OROYA</option>
+                <option value="EML TARMA">EML TARMA</option>
+              </optgroup>
+              <optgroup label="CUSCO">
+                <option value="EML ABANCAY">EML ABANCAY</option>
+                <option value="EML ANDAHUAYLAS">EML ANDAHUAYLAS</option>
+                <option value="EML CUSCO">EML CUSCO</option>
+                <option value="EML PUERTO MALDONADO">EML PUERTO MALDONADO</option>
+              </optgroup>
+              <optgroup label="LIMA">
+                <option value="EML CALLAO">EML CALLAO</option>
+                <option value="EML CAÑETE">EML CAÑETE</option>
+                <option value="EML CARAZ">EML CARAZ</option>
+                <option value="EML CHIMBOTE">EML CHIMBOTE</option>
+                <option value="EML CHINCHA">EML CHINCHA</option>
+                <option value="EML HUACHO">EML HUACHO</option>
+                <option value="EML ICA">EML ICA</option>
+                <option value="EML LIMA NORTE">EML LIMA NORTE</option>
+                <option value="EML SURQUILLO">EML SURQUILLO</option>
+              </optgroup>
+              <optgroup label="NORTE">
+                <option value="EML CAJAMARCA">EML CAJAMARCA</option>
+                <option value="EML CHOTA">EML CHOTA</option>
+                <option value="EML JAEN">EML JAEN</option>
+                <option value="EML LAMBAYEQUE">EML LAMBAYEQUE</option>
+                <option value="EML PIURA">EML PIURA</option>
+                <option value="EML SULLANA">EML SULLANA</option>
+                <option value="EML TRUJILLO">EML TRUJILLO</option>
+                <option value="EML TUMBES">EML TUMBES</option>
+              </optgroup>
+              <optgroup label="ORIENTE">
+                <option value="EML CERRO DE PASCO">EML CERRO DE PASCO</option>
+                <option value="EML HUANUCO">EML HUANUCO</option>
+                <option value="EML PUCALLPA">EML PUCALLPA</option>
+              </optgroup>
+              <optgroup label="PUNO">
+                <option value="EML PUNO">EML PUNO</option>
+              </optgroup>
+              <optgroup label="SAN MARTÍN">
+                <option value="EML BAGUA GRANDE">EML BAGUA GRANDE</option>
+                <option value="EML CHACHAPOYAS">EML CHACHAPOYAS</option>
+                <option value="EML IQUITOS">EML IQUITOS</option>
+                <option value="EML MOYOBAMBA">EML MOYOBAMBA</option>
+                <option value="EML TARAPOTO">EML TARAPOTO</option>
+              </optgroup>
+              <optgroup label="SUR">
+                <option value="EML TACNA">EML TACNA</option>
+                <option value="EML YANAHUARA">EML YANAHUARA</option>
+                <option value="EML MOQUEGUA">EML MOQUEGUA</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="fecha">Fecha</label>
+            <input type="date" name="fecha" id="fecha" required>
+          </div>
+
+          <div class="form-group">
+            <label for="cantidad">Cantidad de Sentenciados</label>
+            <input type="number" name="cantidad" id="cantidad" min="1" required>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="actividad">Actividades realizadas</label>
+            <textarea name="actividad" id="actividad" placeholder="Describe las actividades realizadas durante la campaña..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="lugar">Lugar y Distrito/Provincia</label>
+            <input type="text" name="lugar" id="lugar" placeholder="Ej: Plaza de Armas - Lima, Lima">
+          </div>
+
+          <div class="form-group">
+            <label for="institucion">Instituciones participantes</label>
+            <input type="text" name="institucion" id="institucion" placeholder="Ej: Ministerio de Justicia, Municipalidad...">
+          </div>
+
+          <div class="form-group full-width">
+            <label for="logros">Logros de la campaña</label>
+            <textarea name="logros" id="logros" placeholder="Describe los principales logros y resultados obtenidos..."></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="correo">Correo electrónico del registrador</label>
+            <input type="email" id="correo" name="correo" placeholder="ejemplo@correo.com" required>
+          </div>
+        </div>
+
+        <div class="submit-section">
+          <div class="whatsapp-notice">
+            <p><strong>IMPORTANTE:</strong> Luego de hacer click en ENVIAR, esperar 10 segundos hasta la confirmación.</p>
+            <p><strong>Nota:</strong> Enviar las fotos por WhatsApp:</p>
+            <a href="https://wa.me/51961090923" target="_blank" class="btn-whatsapp">
+              Enviar fotos por WhatsApp (+51 961 090 923)
+            </a>
+          </div>
+
+          <button type="submit" class="submit-btn">
+            Registrar Campaña
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    // Mapeo Oficina -> Establecimientos
+    const establecimientosPorOficina = {
+      "CENTRO": ["EML AYACUCHO","EML CHANCHAMAYO","EML HUANCAVELICA","EML HUANCAYO","EML LA OROYA","EML TARMA"],
+      "CUSCO": ["EML ABANCAY","EML ANDAHUAYLAS","EML CUSCO","EML PUERTO MALDONADO"],
+      "LIMA": ["EML CALLAO","EML CAÑETE","EML CARAZ","EML CHIMBOTE","EML CHINCHA","EML HUACHO","EML ICA","EML LIMA NORTE","EML SURQUILLO"],
+      "NORTE": ["EML CAJAMARCA","EML CHOTA","EML JAEN","EML LAMBAYEQUE","EML PIURA","EML SULLANA","EML TRUJILLO","EML TUMBES"],
+      "ORIENTE": ["EML CERRO DE PASCO","EML HUANUCO","EML PUCALLPA"],
+      "PUNO": ["EML PUNO"],
+      "SAN MARTÍN": ["EML BAGUA GRANDE","EML CHACHAPOYAS","EML IQUITOS","EML MOYOBAMBA","EML TARAPOTO"],
+      "SUR": ["EML TACNA","EML YANAHUARA","EML MOQUEGUA"]
+    };
+
+    // Actualiza el select de establecimientos al elegir oficina
+    document.getElementById("oficina").addEventListener("change", function() {
+      const oficina = this.value;
+      const emlSelect = document.getElementById("establecimiento");
+      
+      // Limpiar opciones actuales
+      emlSelect.innerHTML = '<option value="">-- Selecciona Establecimiento --</option>';
+      
+      if (establecimientosPorOficina[oficina]) {
+        establecimientosPorOficina[oficina].forEach(eml => {
+          const option = document.createElement("option");
+          option.value = eml;
+          option.textContent = eml;
+          emlSelect.appendChild(option);
+        });
+      }
+    });
+
+    // Enviar datos a Google Apps Script
+    document.getElementById("registroForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = document.querySelector('.submit-btn');
+      const formContainer = document.querySelector('.form-container');
+      
+      // Agregar estado de carga
+      submitBtn.classList.add('loading');
+      submitBtn.textContent = 'Enviando...';
+      
+      try {
+        const formData = new FormData(e.target);
+
+        // Simular envío (reemplaza con tu URL de Apps Script)
+        const response = await fetch("TU_URL_DE_APPS_SCRIPT", {
+          method: "POST",
+          body: formData
+        });
+
+        if (response.ok) {
+          // Animación de éxito
+          formContainer.classList.add('success-animation');
+          
+          // Mostrar mensaje de éxito con SweetAlert2
+          await Swal.fire({
+            icon: 'success',
+            title: '¡Registro exitoso!',
+            text: 'La campaña ha sido registrada correctamente',
+            confirmButtonText: 'Continuar',
+            confirmButtonColor: '#fdd835',
+            showClass: {
+              popup: 'animate__animated animate__fadeInDown'
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOutUp'
+            }
+          });
+          
+          // Limpiar formulario
+          e.target.reset();
+          
+          // Abrir WhatsApp
+          window.open("https://wa.me/51961090923?text=Hola, envío las fotos de la campaña registrada.", "_blank");
+          
+        } else {
+          throw new Error('Error en el servidor');
+        }
+      } catch (error) {
+        // Mostrar mensaje de error
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error al enviar',
+          text: 'Hubo un problema al registrar la campaña. Por favor, intenta nuevamente.',
+          confirmButtonText: 'Reintentar',
+          confirmButtonColor: '#f44336'
+        });
+      } finally {
+        // Remover estado de carga
+        submitBtn.classList.remove('loading');
+        submitBtn.textContent = 'Registrar Campaña';
+        formContainer.classList.remove('success-animation');
+      }
+    });
+
+    // Animaciones adicionales
+    document.querySelectorAll('input, select, textarea').forEach(element => {
+      element.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+      });
+      
+      element.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+      });
+    });
+  </script>
+</body>
+</html>
