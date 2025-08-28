@@ -1,358 +1,649 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Sistema de Gestión de Proyectos</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h2 { color: #2c3e50; margin-top: 40px; }
-        .tab { display: none; }
-        .tab.active { display: block; }
-        .nav { margin-bottom: 20px; }
-        .nav button { margin-right: 10px; padding: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background: #f4f4f4; }
-        .form-section { margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa; }
-        .btn { padding: 6px 10px; cursor: pointer; border: none; border-radius: 4px; }
-        .btn-primary { background: #3498db; color: #fff; }
-        .btn-danger { background: #e74c3c; color: #fff; }
-        .btn-warning { background: #f39c12; color: #fff; }
-        .btn-success { background: #2ecc71; color: #fff; }
-        .progress-bar { width: 100%; background: #eee; border-radius: 4px; overflow: hidden; height: 20px; }
-        .progress-fill { height: 100%; background: #27ae60; text-align: center; color: #fff; font-size: 12px; }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sistema de Gestión de Proyectos — Registro por Tarea y Dashboard jerárquico</title>
+<style>
+  :root{--primary:#667eea;--accent:#764ba2;--ok:#27ae60;--danger:#e74c3c}
+  body{font-family:Inter,Segoe UI,Arial;margin:18px;background:#f5f7fb;color:#222}
+  .container{max-width:1100px;margin:0 auto;background:#fff;border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+  h1{margin:0 0 12px;font-size:1.6rem;color:var(--primary)}
+  .topbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  button, input[type=button]{cursor:pointer}
+  .tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+  .tab-btn{padding:8px 12px;border-radius:8px;border:1px solid #e6e9f0;background:#fff}
+  .tab-btn.active{background:linear-gradient(90deg,var(--primary),var(--accent));color:#fff;border-color:transparent}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .card{background:#fff;border-radius:8px;padding:12px;border:1px solid #eef2ff;box-shadow:0 4px 10px rgba(16,24,40,0.02)}
+  label{display:block;font-size:.9rem;margin-bottom:6px;color:#374151;font-weight:600}
+  input[type=text], input[type=number], select, input[type=month]{width:100%;padding:8px;border-radius:6px;border:1px solid #dbe4ff;background:#fff}
+  .small{font-size:.85rem;color:#6b7280}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{padding:8px;text-align:left;border-bottom:1px solid #f1f5f9;font-size:.95rem}
+  th{background:linear-gradient(90deg,var(--primary),var(--accent));color:#fff}
+  .btn{padding:6px 10px;border-radius:6px;border:0;font-weight:600}
+  .btn.primary{background:linear-gradient(90deg,var(--primary),var(--accent));color:#fff}
+  .btn.success{background:var(--ok);color:#fff}
+  .btn.warning{background:#f59e0b;color:#fff}
+  .btn.danger{background:var(--danger);color:#fff}
+  .muted{color:#6b7280}
+  .progress-bar{width:100%;height:18px;background:#eef2ff;border-radius:999px;overflow:hidden;border:1px solid #e6eefc}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--ok),#16a34a);text-align:center;color:#fff;font-size:.8rem;line-height:18px}
+  details{margin:6px 0;padding:6px;border-radius:6px}
+  summary{cursor:pointer;font-weight:700}
+  .crumb{font-size:.95rem;color:#374151;margin-bottom:6px}
+  .meta-small{font-size:.85rem;color:#374151}
+  .row{display:flex;gap:8px;align-items:center}
+  .fullwidth{width:100%}
+  .danger-soft{background:#fff5f5;padding:8px;border-radius:6px;border:1px solid #fde2e2;color:#b91c1c}
+  .ok-soft{background:#f0fdf4;padding:8px;border-radius:6px;border:1px solid #dcfce7;color:#166534}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}.topbar{flex-direction:column}}
+</style>
 </head>
 <body>
-    <h1>Sistema de Gestión de Proyectos</h1>
-    <div class="nav">
-        <button onclick="showTab('personas')">Personas</button>
-        <button onclick="showTab('proyectos')">Proyectos</button>
-        <button onclick="showTab('actividades')">Actividades</button>
-        <button onclick="showTab('tareas')">Tareas</button>
-        <button onclick="showTab('registro')">Registro Mensual</button>
-        <button onclick="showTab('dashboard')">Dashboard</button>
-    </div>
+<div class="container">
+  <h1>📋 Sistema — Registro por Tarea y Dashboard jerárquico</h1>
 
-    <!-- Personas -->
-    <div id="personas" class="tab active">
-        <h2>Gestión de Personas</h2>
-        <div class="form-section">
-            <h3>Registrar Persona</h3>
-            <input type="text" id="nombrePersona" placeholder="Nombre">
-            <button class="btn btn-primary" onclick="agregarPersona()">Agregar Persona</button>
+  <div class="tabs" id="tabs">
+    <button class="tab-btn active" data-tab="manage">Gestionar</button>
+    <button class="tab-btn" data-tab="registro">Registro Mensual (por Tarea)</button>
+    <button class="tab-btn" data-tab="dashboard">Dashboard (Jerárquico)</button>
+  </div>
+
+  <!-- ========== PANELES ========== -->
+  <div id="panel-manage" class="panel">
+
+    <div class="grid">
+      <!-- Personas -->
+      <div class="card">
+        <h3>Personas</h3>
+        <div class="form-row">
+          <label>Nombre</label>
+          <input type="text" id="inputPersona" placeholder="Ej: Juan Pérez">
+          <div style="margin-top:8px">
+            <button class="btn primary" onclick="addPersona()">Agregar</button>
+            <button class="btn" onclick="clearPersonInput()">Limpiar</button>
+          </div>
         </div>
-        <h3>Personas Registradas</h3>
-        <table id="tablaPersonas">
-            <thead><tr><th>Nombre</th><th>Acciones</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
+        <table id="tablaPersonas"><thead><tr><th>Nombre</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+      </div>
 
-    <!-- Proyectos -->
-    <div id="proyectos" class="tab">
-        <h2>Gestión de Proyectos</h2>
-        <div class="form-section">
-            <h3>Registrar Proyecto</h3>
-            <select id="personaProyecto"></select>
-            <input type="text" id="nombreProyecto" placeholder="Nombre del Proyecto">
-            <button class="btn btn-primary" onclick="agregarProyecto()">Agregar Proyecto</button>
+      <!-- Proyectos -->
+      <div class="card">
+        <h3>Proyectos</h3>
+        <label>Persona responsable</label>
+        <select id="selectPersonaProyecto"></select>
+        <label style="margin-top:8px">Nombre proyecto</label>
+        <input type="text" id="inputProyecto" placeholder="Ej: Control de Calidad">
+        <div style="margin-top:8px">
+          <button class="btn primary" onclick="addProyecto()">Agregar</button>
+          <button class="btn" onclick="clearProyectoInput()">Limpiar</button>
         </div>
-        <h3>Proyectos Registrados</h3>
-        <table id="tablaProyectos">
-            <thead><tr><th>Nombre</th><th>Persona</th><th>Acciones</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
+        <table id="tablaProyectos"><thead><tr><th>Proyecto</th><th>Persona</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+      </div>
 
-    <!-- Actividades -->
-    <div id="actividades" class="tab">
-        <h2>Gestión de Actividades</h2>
-        <div class="form-section">
-            <h3>Registrar Actividad</h3>
-            <select id="proyectoActividad"></select>
-            <input type="text" id="nombreActividad" placeholder="Nombre de la Actividad">
-            <input type="number" id="metaActividad" placeholder="Meta Mensual">
-            <button class="btn btn-primary" onclick="agregarActividad()">Agregar Actividad</button>
+      <!-- Actividades -->
+      <div class="card">
+        <h3>Actividades</h3>
+        <label>Proyecto</label>
+        <select id="selectProyectoActividad"></select>
+        <label style="margin-top:8px">Nombre actividad</label>
+        <input type="text" id="inputActividad" placeholder="Ej: Revisión de expedientes">
+        <label style="margin-top:8px">Meta mensual (número)</label>
+        <input type="number" id="inputMetaActividad" min="0" placeholder="Ej: 50">
+        <div style="margin-top:8px">
+          <button class="btn primary" onclick="addActividad()">Agregar</button>
+          <button class="btn" onclick="clearActividadInput()">Limpiar</button>
         </div>
-        <h3>Actividades Registradas</h3>
-        <table id="tablaActividades">
-            <thead><tr><th>Nombre</th><th>Proyecto</th><th>Meta</th><th>Acciones</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
+        <table id="tablaActividades"><thead><tr><th>Actividad</th><th>Proyecto</th><th>Meta</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+      </div>
 
-    <!-- Tareas -->
-    <div id="tareas" class="tab">
-        <h2>Gestión de Tareas</h2>
-        <div class="form-section">
-            <h3>Registrar Tarea</h3>
-            <select id="actividadTarea"></select>
-            <input type="text" id="nombreTarea" placeholder="Nombre de la Tarea">
-            <input type="text" id="descripcionTarea" placeholder="Descripción">
-            <button class="btn btn-primary" onclick="agregarTarea()">Agregar Tarea</button>
+      <!-- Tareas -->
+      <div class="card">
+        <h3>Tareas</h3>
+        <label>Actividad</label>
+        <select id="selectActividadTarea"></select>
+        <label style="margin-top:8px">Nombre tarea</label>
+        <input type="text" id="inputTarea" placeholder="Ej: Revisión X">
+        <label style="margin-top:8px">Descripción</label>
+        <input type="text" id="inputDescTarea" placeholder="Descripción (opcional)">
+        <div style="margin-top:8px">
+          <button class="btn primary" onclick="addTarea()">Agregar</button>
+          <button class="btn" onclick="clearTareaInput()">Limpiar</button>
         </div>
-        <h3>Tareas Registradas</h3>
-        <table id="tablaTareas">
-            <thead><tr><th>Nombre</th><th>Actividad</th><th>Proyecto</th><th>Descripción</th><th>Acciones</th></tr></thead>
-            <tbody></tbody>
-        </table>
+        <table id="tablaTareas"><thead><tr><th>Tarea</th><th>Actividad</th><th>Proyecto</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTRO PANE -->
+  <div id="panel-registro" class="panel" style="display:none;margin-top:12px">
+    <div class="grid">
+      <div class="card">
+        <h3>Registrar cantidad por Tarea (mensual)</h3>
+        <label>Persona</label>
+        <select id="regPersona" onchange="onRegPersonaChange()"></select>
+        <label style="margin-top:8px">Proyecto</label>
+        <select id="regProyecto" onchange="onRegProyectoChange()"></select>
+        <label style="margin-top:8px">Actividad</label>
+        <select id="regActividad" onchange="onRegActividadChange()"></select>
+        <label style="margin-top:8px">Tarea</label>
+        <select id="regTarea"></select>
+
+        <label style="margin-top:8px">Mes</label>
+        <!-- input month provides YYYY-MM format -->
+        <input type="month" id="regMes">
+
+        <label style="margin-top:8px">Cantidad lograda en el mes</label>
+        <input type="number" id="regCantidad" min="0" placeholder="Ej: 12">
+
+        <div style="margin-top:8px">
+          <button class="btn success" onclick="guardarRegistroTarea()">Guardar Registro</button>
+          <button class="btn" onclick="clearRegistroInputs()">Limpiar</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <strong>Registros recientes</strong>
+          <table id="tablaRegistros"><thead><tr><th>Fecha</th><th>Persona</th><th>Proyecto</th><th>Actividad</th><th>Tarea</th><th>Mes</th><th>Cantidad</th><th>Acción</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Notas</h3>
+        <p class="small">Al guardar, se registra la <strong>fecha exacta</strong> (día/hora) automáticamente. Los registros están indexados por mes (YYYY-MM). Puedes volver y ver/editar/eliminar cada registro en la tabla.</p>
+        <div style="margin-top:10px">
+          <button class="btn" onclick="exportarDatos()">Exportar JSON</button>
+          <button class="btn danger" onclick="vaciarStorage()">Eliminar todo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="panel-dashboard" class="panel" style="display:none;margin-top:12px">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div class="row">
+        <label style="margin-right:6px">Mes a mostrar:</label>
+        <input type="month" id="dashMes" onchange="renderDashboard()" />
+        <span class="small muted" style="margin-left:10px">Filtra la vista para el mes seleccionado (YYYY-MM)</span>
+      </div>
+      <div>
+        <button class="btn primary" onclick="renderDashboard()">Actualizar</button>
+      </div>
     </div>
 
-    <!-- Registro Mensual -->
-    <div id="registro" class="tab">
-        <h2>Registro Mensual</h2>
-        <table id="tablaRegistro">
-            <thead><tr><th>Actividad</th><th>Proyecto</th><th>Meta</th><th>Realizado</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
+    <div style="margin-top:12px" id="dashboardContent"></div>
+  </div>
 
-    <!-- Dashboard -->
-    <div id="dashboard" class="tab">
-        <h2>Dashboard</h2>
-        <table id="tablaDashboard">
-            <thead><tr><th>Actividad</th><th>Meta</th><th>Realizado</th><th>Progreso</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
+  <div style="height:8px"></div>
+  <div class="small muted">Sugerencia: Usa la pestaña <strong>Registro Mensual</strong> para ingresar cantidades por tarea por mes. Luego abre <strong>Dashboard</strong> y selecciona el mes para ver migas jerárquicas y progreso.</div>
+</div>
 
-    <script>
-        // --- VARIABLES ---
-        let personas = JSON.parse(localStorage.getItem("personas")) || [];
-        let proyectos = JSON.parse(localStorage.getItem("proyectos")) || [];
-        let actividades = JSON.parse(localStorage.getItem("actividades")) || [];
-        let tareas = JSON.parse(localStorage.getItem("tareas")) || [];
-        let registros = JSON.parse(localStorage.getItem("registros")) || [];
+<script>
+/* -------------------- Datos y LocalStorage -------------------- */
+let personas = JSON.parse(localStorage.getItem('personas')||'[]');
+let proyectos = JSON.parse(localStorage.getItem('proyectos')||'[]');
+let actividades = JSON.parse(localStorage.getItem('actividades')||'[]');
+let tareas = JSON.parse(localStorage.getItem('tareas')||'[]');
+let registros = JSON.parse(localStorage.getItem('registros')||'[]');
 
-        function guardarDatos() {
-            localStorage.setItem("personas", JSON.stringify(personas));
-            localStorage.setItem("proyectos", JSON.stringify(proyectos));
-            localStorage.setItem("actividades", JSON.stringify(actividades));
-            localStorage.setItem("tareas", JSON.stringify(tareas));
-            localStorage.setItem("registros", JSON.stringify(registros));
-        }
+function saveAll(){
+  localStorage.setItem('personas', JSON.stringify(personas));
+  localStorage.setItem('proyectos', JSON.stringify(proyectos));
+  localStorage.setItem('actividades', JSON.stringify(actividades));
+  localStorage.setItem('tareas', JSON.stringify(tareas));
+  localStorage.setItem('registros', JSON.stringify(registros));
+}
 
-        function showTab(tab) {
-            document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-            document.getElementById(tab).classList.add("active");
-            if (tab === "registro") actualizarTablaRegistro();
-            if (tab === "dashboard") actualizarDashboard();
-            actualizarSelects();
-        }
+/* -------------------- Util -------------------- */
+function uid(){ return Date.now() + Math.floor(Math.random()*1000) }
+function formatDateIsoToLocal(iso){
+  try{
+    const d = new Date(iso);
+    return d.toLocaleString();
+  }catch(e){ return iso }
+}
+function currentMonthYYYYMM(){
+  const d = new Date();
+  const m = d.getMonth() + 1;
+  return `${d.getFullYear()}-${String(m).padStart(2,'0')}`;
+}
 
-        // ---------------- PERSONAS ----------------
-        function agregarPersona() {
-            const nombre = document.getElementById("nombrePersona").value.trim();
-            if (!nombre) return alert("Ingrese un nombre");
-            personas.push({id: Date.now(), nombre});
-            guardarDatos();
-            actualizarTablaPersonas();
-            document.getElementById("nombrePersona").value = "";
-        }
-        function editarPersona(id) {
-            const p = personas.find(x => x.id === id);
-            const nuevo = prompt("Nuevo nombre:", p.nombre);
-            if (nuevo) { p.nombre = nuevo; guardarDatos(); actualizarTablaPersonas(); }
-        }
-        function eliminarPersona(id) {
-            personas = personas.filter(p => p.id !== id);
-            guardarDatos(); actualizarTablaPersonas();
-        }
-        function actualizarTablaPersonas() {
-            const tbody = document.querySelector("#tablaPersonas tbody");
-            tbody.innerHTML = "";
-            personas.forEach(p => {
-                tbody.innerHTML += `<tr>
-                  <td>${p.nombre}</td>
-                  <td>
-                    <button class="btn btn-warning" onclick="editarPersona(${p.id})">Editar</button>
-                    <button class="btn btn-danger" onclick="eliminarPersona(${p.id})">Eliminar</button>
-                  </td></tr>`;
-            });
-            actualizarSelects();
-        }
+/* -------------------- Manejo Tabs -------------------- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', e=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    document.getElementById('panel-manage').style.display = tab==='manage' ? '' : 'none';
+    document.getElementById('panel-registro').style.display = tab==='registro' ? '' : 'none';
+    document.getElementById('panel-dashboard').style.display = tab==='dashboard' ? '' : 'none';
+    // render appropriate panel
+    if(tab==='registro'){ renderRegistroPanel() }
+    if(tab==='dashboard'){ initDashMonth(); renderDashboard() }
+  })
+});
 
-        // ---------------- PROYECTOS ----------------
-        function agregarProyecto() {
-            const personaId = +document.getElementById("personaProyecto").value;
-            const nombre = document.getElementById("nombreProyecto").value.trim();
-            if (!personaId || !nombre) return alert("Complete los datos");
-            proyectos.push({id: Date.now(), personaId, nombre});
-            guardarDatos(); actualizarTablaProyectos();
-            document.getElementById("nombreProyecto").value = "";
-        }
-        function editarProyecto(id) {
-            const p = proyectos.find(x => x.id === id);
-            const nuevo = prompt("Nuevo nombre:", p.nombre);
-            if (nuevo) { p.nombre = nuevo; guardarDatos(); actualizarTablaProyectos(); }
-        }
-        function eliminarProyecto(id) {
-            proyectos = proyectos.filter(p => p.id !== id);
-            guardarDatos(); actualizarTablaProyectos();
-        }
-        function actualizarTablaProyectos() {
-            const tbody = document.querySelector("#tablaProyectos tbody");
-            tbody.innerHTML = "";
-            proyectos.forEach(p => {
-                const persona = personas.find(x => x.id === p.personaId);
-                tbody.innerHTML += `<tr>
-                  <td>${p.nombre}</td>
-                  <td>${persona ? persona.nombre : ""}</td>
-                  <td>
-                    <button class="btn btn-warning" onclick="editarProyecto(${p.id})">Editar</button>
-                    <button class="btn btn-danger" onclick="eliminarProyecto(${p.id})">Eliminar</button>
-                  </td></tr>`;
-            });
-            actualizarSelects();
-        }
+/* -------------------- CRUD Personas -------------------- */
+function addPersona(){
+  const name = document.getElementById('inputPersona').value.trim();
+  if(!name){ alert('Ingrese nombre de la persona'); return; }
+  personas.push({id:uid(), nombre:name});
+  saveAll(); document.getElementById('inputPersona').value=''; renderAllTables();
+}
+function editPersona(id){
+  const p = personas.find(x=>x.id===id);
+  const nuevo = prompt('Editar nombre:', p.nombre);
+  if(nuevo===null) return;
+  p.nombre = nuevo.trim() || p.nombre;
+  // Update dependents? keep ids same
+  saveAll(); renderAllTables();
+}
+function delPersona(id){
+  if(!confirm('Eliminar persona y todos sus proyectos/actividades/tareas y registros relacionados?')) return;
+  // remove projects, activities, tasks and registros linked
+  const proyectosDel = proyectos.filter(pr=>pr.personaId===id).map(pr=>pr.id);
+  proyectos = proyectos.filter(pr=>pr.personaId!==id);
+  actividades = actividades.filter(a=>!proyectosDel.includes(a.proyectoId));
+  const actividadesDel = actividades.filter(a=>proyectosDel.includes(a.proyectoId)).map(a=>a.id);
+  tareas = tareas.filter(t=>!actividadesDel.includes(t.actividadId));
+  registros = registros.filter(r=>r.personaId!==id);
+  personas = personas.filter(p=>p.id!==id);
+  saveAll(); renderAllTables();
+}
 
-        // ---------------- ACTIVIDADES ----------------
-        function agregarActividad() {
-            const proyectoId = +document.getElementById("proyectoActividad").value;
-            const nombre = document.getElementById("nombreActividad").value.trim();
-            const meta = +document.getElementById("metaActividad").value;
-            if (!proyectoId || !nombre || !meta) return alert("Complete los datos");
-            actividades.push({id: Date.now(), proyectoId, nombre, meta});
-            guardarDatos(); actualizarTablaActividades();
-            document.getElementById("nombreActividad").value = "";
-            document.getElementById("metaActividad").value = "";
-        }
-        function editarActividad(id) {
-            const a = actividades.find(x => x.id === id);
-            const nuevo = prompt("Nuevo nombre:", a.nombre);
-            if (nuevo) { a.nombre = nuevo; }
-            const nuevaMeta = prompt("Nueva meta:", a.meta);
-            if (nuevaMeta) { a.meta = +nuevaMeta; }
-            guardarDatos(); actualizarTablaActividades();
-        }
-        function eliminarActividad(id) {
-            actividades = actividades.filter(a => a.id !== id);
-            guardarDatos(); actualizarTablaActividades();
-        }
-        function actualizarTablaActividades() {
-            const tbody = document.querySelector("#tablaActividades tbody");
-            tbody.innerHTML = "";
-            actividades.forEach(a => {
-                const proyecto = proyectos.find(x => x.id === a.proyectoId);
-                tbody.innerHTML += `<tr>
-                  <td>${a.nombre}</td>
-                  <td>${proyecto ? proyecto.nombre : ""}</td>
-                  <td>${a.meta}</td>
-                  <td>
-                    <button class="btn btn-warning" onclick="editarActividad(${a.id})">Editar</button>
-                    <button class="btn btn-danger" onclick="eliminarActividad(${a.id})">Eliminar</button>
-                  </td></tr>`;
-            });
-            actualizarSelects();
-        }
+/* -------------------- CRUD Proyectos -------------------- */
+function addProyecto(){
+  const personaId = document.getElementById('selectPersonaProyecto').value;
+  const nombre = document.getElementById('inputProyecto').value.trim();
+  if(!personaId || !nombre){ alert('Seleccione persona y nombre del proyecto'); return; }
+  proyectos.push({id:uid(), personaId:personaId, nombre});
+  saveAll(); document.getElementById('inputProyecto').value=''; renderAllTables();
+}
+function editProyecto(id){
+  const p = proyectos.find(x=>x.id===id);
+  const nuevo = prompt('Editar nombre del proyecto:', p.nombre);
+  if(nuevo===null) return;
+  p.nombre = nuevo.trim() || p.nombre;
+  saveAll(); renderAllTables();
+}
+function delProyecto(id){
+  if(!confirm('Eliminar proyecto, actividades, tareas y registros vinculados?')) return;
+  actividades = actividades.filter(a=>a.proyectoId!==id);
+  tareas = tareas.filter(t=> {
+    const act = actividades.find(a=>a.id===t.actividadId);
+    // if activity removed earlier, keep only those whose activity exists
+    return Boolean(act);
+  });
+  registros = registros.filter(r=>r.proyectoId!==id);
+  proyectos = proyectos.filter(p=>p.id!==id);
+  saveAll(); renderAllTables();
+}
 
-        // ---------------- TAREAS ----------------
-        function agregarTarea() {
-            const actividadId = +document.getElementById("actividadTarea").value;
-            const nombre = document.getElementById("nombreTarea").value.trim();
-            const desc = document.getElementById("descripcionTarea").value.trim();
-            if (!actividadId || !nombre) return alert("Complete los datos");
-            tareas.push({id: Date.now(), actividadId, nombre, descripcion: desc});
-            guardarDatos(); actualizarTablaTareas();
-            document.getElementById("nombreTarea").value = "";
-            document.getElementById("descripcionTarea").value = "";
-        }
-        function editarTarea(id) {
-            const t = tareas.find(x => x.id === id);
-            const nuevo = prompt("Nuevo nombre:", t.nombre);
-            if (nuevo) { t.nombre = nuevo; }
-            const nuevaDesc = prompt("Nueva descripción:", t.descripcion);
-            if (nuevaDesc !== null) { t.descripcion = nuevaDesc; }
-            guardarDatos(); actualizarTablaTareas();
-        }
-        function eliminarTarea(id) {
-            tareas = tareas.filter(t => t.id !== id);
-            guardarDatos(); actualizarTablaTareas();
-        }
-        function actualizarTablaTareas() {
-            const tbody = document.querySelector("#tablaTareas tbody");
-            tbody.innerHTML = "";
-            tareas.forEach(t => {
-                const actividad = actividades.find(x => x.id === t.actividadId);
-                const proyecto = actividad ? proyectos.find(p => p.id === actividad.proyectoId) : null;
-                tbody.innerHTML += `<tr>
-                  <td>${t.nombre}</td>
-                  <td>${actividad ? actividad.nombre : ""}</td>
-                  <td>${proyecto ? proyecto.nombre : ""}</td>
-                  <td>${t.descripcion}</td>
-                  <td>
-                    <button class="btn btn-warning" onclick="editarTarea(${t.id})">Editar</button>
-                    <button class="btn btn-danger" onclick="eliminarTarea(${t.id})">Eliminar</button>
-                  </td></tr>`;
-            });
-            actualizarSelects();
-        }
+/* -------------------- CRUD Actividades -------------------- */
+function addActividad(){
+  const proyectoId = document.getElementById('selectProyectoActividad').value;
+  const nombre = document.getElementById('inputActividad').value.trim();
+  const meta = parseFloat(document.getElementById('inputMetaActividad').value);
+  if(!proyectoId || !nombre || isNaN(meta)){ alert('Complete proyecto, nombre y meta (número)'); return; }
+  actividades.push({id:uid(), proyectoId:proyectoId, nombre, meta});
+  saveAll(); document.getElementById('inputActividad').value=''; document.getElementById('inputMetaActividad').value=''; renderAllTables();
+}
+function editActividad(id){
+  const a = actividades.find(x=>x.id===id);
+  const nuevo = prompt('Editar nombre de la actividad:', a.nombre);
+  if(nuevo!==null){ a.nombre = nuevo.trim() || a.nombre; }
+  const nuevaMeta = prompt('Editar meta mensual (número):', a.meta);
+  if(nuevaMeta!==null && nuevaMeta!==''){ const nm = parseFloat(nuevaMeta); if(!isNaN(nm)) a.meta = nm; }
+  saveAll(); renderAllTables();
+}
+function delActividad(id){
+  if(!confirm('Eliminar actividad, tareas y registros vinculados?')) return;
+  tareas = tareas.filter(t=>t.actividadId!==id);
+  registros = registros.filter(r=>r.actividadId!==id);
+  actividades = actividades.filter(a=>a.id!==id);
+  saveAll(); renderAllTables();
+}
 
-        // ---------------- REGISTRO MENSUAL ----------------
-        function actualizarTablaRegistro() {
-            const tbody = document.querySelector("#tablaRegistro tbody");
-            tbody.innerHTML = "";
-            actividades.forEach(a => {
-                const proyecto = proyectos.find(x => x.id === a.proyectoId);
-                const reg = registros.find(r => r.actividadId === a.id);
-                const valor = reg ? reg.realizado : 0;
-                tbody.innerHTML += `<tr>
-                  <td>${a.nombre}</td>
-                  <td>${proyecto ? proyecto.nombre : ""}</td>
-                  <td>${a.meta}</td>
-                  <td>
-                    <input type="number" value="${valor}" onchange="guardarRegistro(${a.id}, this.value)">
-                  </td></tr>`;
-            });
-        }
-        function guardarRegistro(actividadId, valor) {
-            let reg = registros.find(r => r.actividadId === actividadId);
-            if (reg) reg.realizado = +valor;
-            else registros.push({actividadId, realizado: +valor});
-            guardarDatos();
-        }
+/* -------------------- CRUD Tareas -------------------- */
+function addTarea(){
+  const actividadId = document.getElementById('selectActividadTarea').value;
+  const nombre = document.getElementById('inputTarea').value.trim();
+  const desc = document.getElementById('inputDescTarea').value.trim();
+  if(!actividadId || !nombre){ alert('Complete actividad y nombre de tarea'); return; }
+  tareas.push({id:uid(), actividadId, nombre, descripcion:desc});
+  saveAll(); document.getElementById('inputTarea').value=''; document.getElementById('inputDescTarea').value=''; renderAllTables();
+}
+function editTarea(id){
+  const t = tareas.find(x=>x.id===id);
+  const nuevo = prompt('Editar nombre de la tarea:', t.nombre);
+  if(nuevo!==null) t.nombre = nuevo.trim() || t.nombre;
+  const nuevaDesc = prompt('Editar descripción:', t.descripcion||'');
+  if(nuevaDesc!==null) t.descripcion = nuevaDesc;
+  saveAll(); renderAllTables();
+}
+function delTarea(id){
+  if(!confirm('Eliminar tarea y registros vinculados?')) return;
+  registros = registros.filter(r=>r.tareaId!==id);
+  tareas = tareas.filter(t=>t.id!==id);
+  saveAll(); renderAllTables();
+}
 
-        // ---------------- DASHBOARD ----------------
-        function actualizarDashboard() {
-            const tbody = document.querySelector("#tablaDashboard tbody");
-            tbody.innerHTML = "";
-            actividades.forEach(a => {
-                const reg = registros.find(r => r.actividadId === a.id);
-                const realizado = reg ? reg.realizado : 0;
-                const porcentaje = a.meta > 0 ? Math.min(100, Math.round((realizado / a.meta) * 100)) : 0;
-                tbody.innerHTML += `<tr>
-                  <td>${a.nombre}</td>
-                  <td>${a.meta}</td>
-                  <td>${realizado}</td>
-                  <td>
-                    <div class="progress-bar"><div class="progress-fill" style="width:${porcentaje}%">${porcentaje}%</div></div>
-                  </td></tr>`;
-            });
-        }
+/* -------------------- Registro por tarea (mensual) -------------------- */
+function renderRegistroPanel(){
+  // set default month as current
+  const m = currentMonthYYYYMM();
+  if(!document.getElementById('regMes').value) document.getElementById('regMes').value = m;
+  fillRegSelectors();
+  renderRegistrosTable();
+}
+function fillRegSelectors(){
+  // personas in registro form
+  const selP = document.getElementById('regPersona');
+  selP.innerHTML = `<option value="">-- seleccionar persona --</option>` + personas.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
+  // proyectos default empty
+  document.getElementById('regProyecto').innerHTML = `<option value="">-- seleccionar proyecto --</option>`;
+  document.getElementById('regActividad').innerHTML = `<option value="">-- seleccionar actividad --</option>`;
+  document.getElementById('regTarea').innerHTML = `<option value="">-- seleccionar tarea --</option>`;
+}
+function onRegPersonaChange(){
+  const personaId = document.getElementById('regPersona').value;
+  const sel = document.getElementById('regProyecto');
+  if(!personaId){ sel.innerHTML = `<option value="">-- seleccionar proyecto --</option>`; return; }
+  const projs = proyectos.filter(pr=>pr.personaId===personaId);
+  sel.innerHTML = `<option value="">-- seleccionar proyecto --</option>` + projs.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
+  document.getElementById('regActividad').innerHTML = `<option value="">-- seleccionar actividad --</option>`;
+  document.getElementById('regTarea').innerHTML = `<option value="">-- seleccionar tarea --</option>`;
+}
+function onRegProyectoChange(){
+  const proyectoId = document.getElementById('regProyecto').value;
+  const sel = document.getElementById('regActividad');
+  if(!proyectoId){ sel.innerHTML = `<option value="">-- seleccionar actividad --</option>`; return; }
+  const acts = actividades.filter(a=>a.proyectoId===proyectoId);
+  sel.innerHTML = `<option value="">-- seleccionar actividad --</option>` + acts.map(a=>`<option value="${a.id}">${a.nombre} (meta:${a.meta})</option>`).join('');
+  document.getElementById('regTarea').innerHTML = `<option value="">-- seleccionar tarea --</option>`;
+}
+function onRegActividadChange(){
+  const actividadId = document.getElementById('regActividad').value;
+  const sel = document.getElementById('regTarea');
+  if(!actividadId){ sel.innerHTML = `<option value="">-- seleccionar tarea --</option>`; return; }
+  const ts = tareas.filter(t=>t.actividadId===actividadId);
+  sel.innerHTML = `<option value="">-- seleccionar tarea --</option>` + ts.map(t=>`<option value="${t.id}">${t.nombre}</option>`).join('');
+}
 
-        // ---------------- SELECTS ----------------
-        function actualizarSelects() {
-            const selPersona = document.getElementById("personaProyecto");
-            if (selPersona) {
-                selPersona.innerHTML = personas.map(p => `<option value="${p.id}">${p.nombre}</option>`).join("");
+function guardarRegistroTarea(){
+  const personaId = document.getElementById('regPersona').value;
+  const proyectoId = document.getElementById('regProyecto').value;
+  const actividadId = document.getElementById('regActividad').value;
+  const tareaId = document.getElementById('regTarea').value;
+  const mes = document.getElementById('regMes').value; // YYYY-MM
+  const cantidad = parseFloat(document.getElementById('regCantidad').value);
+  if(!personaId || !proyectoId || !actividadId || !tareaId || !mes || isNaN(cantidad)){
+    alert('Complete persona, proyecto, actividad, tarea, mes y una cantidad numérica');
+    return;
+  }
+  const nuevo = {
+    id: uid(),
+    personaId, proyectoId, actividadId, tareaId,
+    mes,
+    cantidad: +cantidad,
+    fechaRegistro: new Date().toISOString()
+  };
+  registros.push(nuevo);
+  saveAll();
+  renderRegistrosTable();
+  alert('Registro guardado con fecha: ' + formatDateIsoToLocal(nuevo.fechaRegistro));
+  // keep month default, clear cantidad
+  document.getElementById('regCantidad').value = '';
+}
+
+/* Mostrar registros guardados con acciones editar/eliminar */
+function renderRegistrosTable(){
+  const tbody = document.querySelector('#tablaRegistros tbody');
+  tbody.innerHTML = '';
+  // sort descendant by fecha
+  const sorted = [...registros].sort((a,b)=> new Date(b.fechaRegistro) - new Date(a.fechaRegistro));
+  sorted.forEach(r=>{
+    const p = personas.find(x=>x.id===r.personaId);
+    const pr = proyectos.find(x=>x.id===r.proyectoId);
+    const a = actividades.find(x=>x.id===r.actividadId);
+    const t = tareas.find(x=>x.id===r.tareaId);
+    tbody.innerHTML += `<tr>
+      <td>${formatDateIsoToLocal(r.fechaRegistro)}</td>
+      <td>${p?p.nombre:'-'}</td>
+      <td>${pr?pr.nombre:'-'}</td>
+      <td>${a?a.nombre:'-'}</td>
+      <td>${t?t.nombre:'-'}</td>
+      <td>${r.mes}</td>
+      <td>${r.cantidad}</td>
+      <td>
+        <button class="btn warning" onclick="editarRegistro('${r.id}')">Editar</button>
+        <button class="btn danger" onclick="eliminarRegistro('${r.id}')">Eliminar</button>
+      </td>
+    </tr>`;
+  });
+}
+
+/* Edit/Del registro */
+function editarRegistro(id){
+  const r = registros.find(x=>x.id===id);
+  if(!r) return;
+  const nuevo = prompt('Editar cantidad (número):', r.cantidad);
+  if(nuevo===null) return;
+  const nnum = parseFloat(nuevo);
+  if(isNaN(nnum)){ alert('Valor no numérico'); return; }
+  // Optionally allow changing month:
+  const nuevoMes = prompt('Editar mes (YYYY-MM):', r.mes);
+  if(nuevoMes===null) return;
+  r.cantidad = nnum;
+  r.mes = nuevoMes;
+  r.fechaRegistro = new Date().toISOString(); // update date to now so user sees last edit date
+  saveAll(); renderRegistrosTable();
+}
+function eliminarRegistro(id){
+  if(!confirm('Eliminar registro?')) return;
+  registros = registros.filter(r=>r.id!==id); saveAll(); renderRegistrosTable();
+}
+
+/* -------------------- Dashboard jerárquico (migas) -------------------- */
+function initDashMonth(){
+  const el = document.getElementById('dashMes');
+  if(!el.value) el.value = currentMonthYYYYMM();
+}
+function renderDashboard(){
+  const container = document.getElementById('dashboardContent');
+  const month = document.getElementById('dashMes').value || currentMonthYYYYMM();
+  container.innerHTML = '';
+  if(personas.length===0){ container.innerHTML = '<div class="danger-soft">No hay personas ni datos.</div>'; return; }
+
+  // helper: sum registros by actividad/tarea for given month
+  function sumByActivity(activityId, mes){
+    // sum across tareas of that activity for that month
+    return registros.filter(r=>r.actividadId===activityId && r.mes===mes).reduce((s,r)=>s + (r.cantidad||0),0);
+  }
+  function sumByTask(taskId, mes){
+    return registros.filter(r=>r.tareaId===taskId && r.mes===mes).reduce((s,r)=>s + (r.cantidad||0),0);
+  }
+
+  // For each persona
+  personas.forEach(persona=>{
+    const personDiv = document.createElement('div');
+    const detailsP = document.createElement('details');
+    const summaryP = document.createElement('summary');
+    summaryP.innerHTML = `👤 ${persona.nombre}`;
+    detailsP.appendChild(summaryP);
+
+    // Projects of person
+    const projs = proyectos.filter(pr=>pr.personaId===persona.id);
+    if(projs.length===0){
+      const empty = document.createElement('div');
+      empty.className = 'muted small';
+      empty.textContent = '— Sin proyectos';
+      detailsP.appendChild(empty);
+    } else {
+      projs.forEach(proyecto=>{
+        const detailsPr = document.createElement('details');
+        detailsPr.style.marginLeft = '12px';
+        const summaryPr = document.createElement('summary');
+        summaryPr.innerHTML = `📁 ${proyecto.nombre}`;
+        detailsPr.appendChild(summaryPr);
+
+        // Actividades del proyecto
+        const acts = actividades.filter(a=>a.proyectoId===proyecto.id);
+        if(acts.length===0){
+          const empty = document.createElement('div');
+          empty.className='muted small';
+          empty.textContent = '— Sin actividades';
+          detailsPr.appendChild(empty);
+        } else {
+          acts.forEach(act=>{
+            const detailsA = document.createElement('details');
+            detailsA.style.marginLeft = '12px';
+            const summaryA = document.createElement('summary');
+
+            const logrado = sumByActivity(act.id, month); // sum of all tasks for that activity in month
+            const porcentaje = act.meta > 0 ? Math.round((logrado / act.meta) * 100) : 0;
+            summaryA.innerHTML = `📌 ${act.nombre} — Meta: <strong>${act.meta}</strong> | Logrado (${month}): <strong>${logrado}</strong> — ${porcentaje}%`;
+            detailsA.appendChild(summaryA);
+
+            // show progress bar
+            const barWrap = document.createElement('div');
+            barWrap.style.margin = '8px 0';
+            barWrap.innerHTML = `<div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,porcentaje)}%">${porcentaje}%</div></div>`;
+            detailsA.appendChild(barWrap);
+
+            // List tasks
+            const ts = tareas.filter(t=>t.actividadId===act.id);
+            if(ts.length===0){
+              const empty = document.createElement('div'); empty.className='muted small'; empty.textContent='— Sin tareas';
+              detailsA.appendChild(empty);
+            } else {
+              ts.forEach(task=>{
+                const tDiv = document.createElement('div');
+                tDiv.style.marginLeft = '12px';
+                const logradaT = sumByTask(task.id, month);
+                // show task line
+                tDiv.innerHTML = `✅ ${task.nombre} — Logrado (${month}): <strong>${logradaT}</strong>` + (task.descripcion?` <span class="muted">(${task.descripcion})</span>`:'');
+                detailsA.appendChild(tDiv);
+              });
             }
-            const selProyecto = document.getElementById("proyectoActividad");
-            if (selProyecto) {
-                selProyecto.innerHTML = proyectos.map(p => `<option value="${p.id}">${p.nombre}</option>`).join("");
-            }
-            const selActividad = document.getElementById("actividadTarea");
-            if (selActividad) {
-                selActividad.innerHTML = actividades.map(a => `<option value="${a.id}">${a.nombre}</option>`).join("");
-            }
+            detailsPr.appendChild(detailsA);
+          });
         }
+        detailsP.appendChild(detailsPr);
+      });
+    }
+    container.appendChild(detailsP);
+  });
+}
 
-        document.addEventListener("DOMContentLoaded", () => {
-            actualizarTablaPersonas();
-            actualizarTablaProyectos();
-            actualizarTablaActividades();
-            actualizarTablaTareas();
-        });
-    </script>
+/* -------------------- Render tablas de gestión -------------------- */
+function renderAllTables(){
+  // Personas table
+  const tbodyP = document.querySelector('#tablaPersonas tbody');
+  tbodyP.innerHTML = '';
+  personas.forEach(p=>{
+    tbodyP.innerHTML += `<tr>
+      <td>${p.nombre}</td>
+      <td>
+        <button class="btn warning" onclick="editPersona('${p.id}')">Editar</button>
+        <button class="btn danger" onclick="delPersona('${p.id}')">Eliminar</button>
+      </td>
+    </tr>`;
+  });
+
+  // Proyectos table
+  const tbodyPr = document.querySelector('#tablaProyectos tbody');
+  tbodyPr.innerHTML = '';
+  proyectos.forEach(pr=>{
+    const persona = personas.find(pp=>pp.id===pr.personaId);
+    tbodyPr.innerHTML += `<tr>
+      <td>${pr.nombre}</td>
+      <td>${persona?persona.nombre:'--'}</td>
+      <td>
+        <button class="btn warning" onclick="editProyecto('${pr.id}')">Editar</button>
+        <button class="btn danger" onclick="delProyecto('${pr.id}')">Eliminar</button>
+      </td>
+    </tr>`;
+  });
+
+  // Actividades table
+  const tbodyA = document.querySelector('#tablaActividades tbody');
+  tbodyA.innerHTML = '';
+  actividades.forEach(a=>{
+    const proyecto = proyectos.find(pp=>pp.id===a.proyectoId);
+    tbodyA.innerHTML += `<tr>
+      <td>${a.nombre}</td>
+      <td>${proyecto?proyecto.nombre:'--'}</td>
+      <td>${a.meta}</td>
+      <td>
+        <button class="btn warning" onclick="editActividad('${a.id}')">Editar</button>
+        <button class="btn danger" onclick="delActividad('${a.id}')">Eliminar</button>
+      </td>
+    </tr>`;
+  });
+
+  // Tareas table
+  const tbodyT = document.querySelector('#tablaTareas tbody');
+  tbodyT.innerHTML = '';
+  tareas.forEach(t=>{
+    const actividad = actividades.find(a=>a.id===t.actividadId);
+    const proyecto = actividad ? proyectos.find(p=>p.id===actividad.proyectoId) : null;
+    tbodyT.innerHTML += `<tr>
+      <td>${t.nombre}</td>
+      <td>${actividad?actividad.nombre:'--'}</td>
+      <td>${proyecto?proyecto.nombre:'--'}</td>
+      <td>
+        <button class="btn warning" onclick="editTarea('${t.id}')">Editar</button>
+        <button class="btn danger" onclick="delTarea('${t.id}')">Eliminar</button>
+      </td>
+    </tr>`;
+  });
+
+  // fill selects used in manage
+  const selPersonaProyecto = document.getElementById('selectPersonaProyecto');
+  selPersonaProyecto.innerHTML = `<option value="">-- seleccionar persona --</option>` + personas.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
+  const selProyectoActividad = document.getElementById('selectProyectoActividad');
+  selProyectoActividad.innerHTML = `<option value="">-- seleccionar proyecto --</option>` + proyectos.map(pr=>`<option value="${pr.id}">${pr.nombre}</option>`).join('');
+  const selActividadTarea = document.getElementById('selectActividadTarea');
+  selActividadTarea.innerHTML = `<option value="">-- seleccionar actividad --</option>` + actividades.map(a=>`<option value="${a.id}">${a.nombre} (meta:${a.meta})</option>`).join('');
+
+  // also update registro panel selectors if shown
+  fillRegSelectors();
+  renderRegistrosTable();
+  renderDashboard();
+}
+
+/* -------------------- Helpers UI small -------------------- */
+function clearPersonInput(){ document.getElementById('inputPersona').value=''; }
+function clearProyectoInput(){ document.getElementById('inputProyecto').value=''; }
+function clearActividadInput(){ document.getElementById('inputActividad').value=''; document.getElementById('inputMetaActividad').value=''; }
+function clearTareaInput(){ document.getElementById('inputTarea').value=''; document.getElementById('inputDescTarea').value=''; }
+function clearRegistroInputs(){ document.getElementById('regCantidad').value=''; }
+
+/* -------------------- Export / Reset -------------------- */
+function exportarDatos(){
+  const data = {personas,proyectos,actividades,tareas,registros};
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'sistema_datos.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+function vaciarStorage(){
+  if(!confirm('Eliminar TODOS los datos (esto no se puede deshacer)?')) return;
+  personas=[]; proyectos=[]; actividades=[]; tareas=[]; registros=[];
+  saveAll(); renderAllTables();
+}
+
+/* -------------------- Inicializar -------------------- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // default dash month
+  document.getElementById('dashMes').value = currentMonthYYYYMM();
+  // default reg month
+  document.getElementById('regMes').value = currentMonthYYYYMM();
+  renderAllTables();
+});
+</script>
 </body>
 </html>
