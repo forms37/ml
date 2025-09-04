@@ -1,104 +1,285 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Checklist Matrimonio Civil - Jesús María</title>
+  <meta charset="utf-8">
+  <title>Planificador Matrimonio Civil - Jesús María</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:18px;background:#f7f7fb;color:#111}
-    .wrap{max-width:980px;margin:0 auto;background:#fff;padding:18px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-    h1{margin:0 0 8px;font-size:20px}
-    h2{margin-top:18px;margin-bottom:8px;font-size:16px}
-    section{margin-bottom:12px}
-    label{display:block;margin:6px 0;font-size:14px}
-    input[type="date"],input[type="number"],input[type="text"]{padding:6px;border:1px solid #ccc;border-radius:6px}
-    .small{font-size:13px;color:#666}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-    button{background:#0366d6;color:#fff;border:none;padding:8px 10px;border-radius:8px;cursor:pointer}
-    button.ghost{background:#efefef;color:#111}
-    .grid{display:grid;gap:8px}
-    .cols-2{grid-template-columns:1fr 1fr}
-    .card{border:1px solid #eee;padding:10px;border-radius:8px;background:#fafafa}
-    .task{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px dashed #eee}
-    .task:last-child{border-bottom:none}
-    textarea{width:100%;min-height:48px;border-radius:6px;padding:6px;border:1px solid #ddd}
-    .price{font-weight:600}
-    .right{text-align:right}
-    .muted{color:#666;font-size:13px}
-    .tiny{font-size:12px;color:#777}
-    .expenses-row{display:flex;gap:8px;align-items:center}
-    .btn-danger{background:#d9534f}
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f9; color: #333; }
+    header { background: #2b6cb0; color: white; padding: 12px; text-align: center; }
+    h1 { margin: 0; font-size: 20px; }
+    .tabs { display: flex; background: #edf2f7; border-bottom: 2px solid #ccc; }
+    .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-weight: bold; }
+    .tab.active { background: #2b6cb0; color: white; }
+    .content { display: none; padding: 16px; }
+    .content.active { display: block; }
+    .task { display: flex; align-items: center; margin-bottom: 8px; }
+    .task select, .task textarea { margin-left: 8px; }
+    .progress-bar { background: #e2e8f0; border-radius: 8px; overflow: hidden; height: 18px; margin: 10px 0; }
+    .progress-fill { background: #2b6cb0; height: 100%; text-align: right; color: white; padding-right: 4px; font-size: 12px; }
+    .alert { color: red; font-size: 14px; }
+    .budget-item { display: flex; gap: 8px; margin-bottom: 6px; }
+    .budget-item input { flex: 1; padding: 4px; }
+    button { background: #2b6cb0; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+    button.ghost { background: #e2e8f0; color: #333; }
+    footer { font-size: 12px; color: gray; padding: 12px; text-align: center; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>📋 Planificador: Matrimonio Civil — Municipalidad de Jesús María</h1>
-    <p class="small">App simple que guarda en tu navegador (no sube nada). Puedes exportar/importar JSON para respaldo.</p>
+<header>
+  <h1>📋 Planificador Matrimonio Civil — Jesús María</h1>
+</header>
 
-    <div class="controls">
-      <button id="exportBtn">Exportar (JSON)</button>
-      <label class="ghost btn-file" style="padding:0 8px;background:#efefef;border-radius:8px;display:inline-block;cursor:pointer">
-        <input id="importFile" type="file" accept=".json" style="display:none"> <span style="padding:8px 6px;display:inline-block">Importar</span>
-      </label>
-      <button id="resetBtn" class="btn-danger">Restablecer</button>
-    </div>
+<div class="tabs">
+  <div class="tab active" data-tab="req">Requisitos</div>
+  <div class="tab" data-tab="exp">Expediente</div>
+  <div class="tab" data-tab="res">Reserva</div>
+  <div class="tab" data-tab="pres">Presupuesto</div>
+</div>
 
-    <section id="fechas" class="card">
-      <h2>Fechas clave</h2>
-      <div class="grid cols-2">
-        <label>Fecha de publicación del Edicto<br><input id="edictDate" type="date"></label>
-        <label>Fecha de emisión del Certificado médico<br><input id="certDate" type="date"></label>
-        <label>Fecha tentativa de la ceremonia<br><input id="ceremonyDate" type="date"></label>
-        <div>
-          <div class="muted tiny">Cálculos automáticos:</div>
-          <div id="computed" style="margin-top:6px"></div>
-        </div>
-      </div>
-    </section>
+<!-- Requisitos -->
+<div id="req" class="content active">
+  <h2>1. Requisitos previos</h2>
+  <div id="reqTasks"></div>
+  <div class="progress-bar"><div id="reqProgress" class="progress-fill">0%</div></div>
+</div>
 
-    <section id="checklistSection">
-      <h2>Checklist</h2>
-      <div id="checklistRoot" class="card"></div>
-    </section>
+<!-- Expediente -->
+<div id="exp" class="content">
+  <h2>2. Expediente matrimonial</h2>
+  <div id="expTasks"></div>
+  <div class="progress-bar"><div id="expProgress" class="progress-fill">0%</div></div>
+</div>
 
-    <section id="budgetSection">
-      <h2>Presupuesto</h2>
-      <div class="card">
-        <label>Salón Cuba (S/.)<br><input id="salonCost" type="number" step="0.01" value="308.60"></label>
-        <div style="margin-top:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div class="muted">Otros gastos</div>
-            <button id="addExpense" class="ghost">Agregar</button>
-          </div>
-          <div id="expensesList" style="margin-top:8px"></div>
-          <div style="display:flex;justify-content:space-between;margin-top:10px;border-top:1px dashed #eee;padding-top:8px">
-            <div class="muted">Total estimado</div>
-            <div class="price" id="totalPrice">S/ 0.00</div>
-          </div>
-        </div>
-      </div>
-    </section>
+<!-- Reserva -->
+<div id="res" class="content">
+  <h2>3. Reserva y fechas</h2>
+  <label>📅 Publicación del Edicto: <input type="date" id="edictDate"></label><br><br>
+  <label>📅 Certificado médico: <input type="date" id="certDate"></label><br><br>
+  <label>📅 Fecha de ceremonia: <input type="date" id="ceremonyDate"></label>
+  <div id="alerts"></div>
+  <hr>
+  <div id="resTasks"></div>
+  <div class="progress-bar"><div id="resProgress" class="progress-fill">0%</div></div>
+</div>
 
-    <footer class="tiny muted" style="margin-top:12px">
-      Nota: la app guarda en <strong>este navegador y equipo</strong>. Si cambias de equipo o borras datos, sube/exporta el JSON para respaldar.
-    </footer>
-  </div>
+<!-- Presupuesto -->
+<div id="pres" class="content">
+  <h2>4. Presupuesto</h2>
+  <div id="budgetList"></div>
+  <button id="addExpense">➕ Agregar gasto</button>
+  <h3>Total: S/ <span id="totalBudget">0.00</span></h3>
+</div>
+
+<!-- Export/Import -->
+<div style="padding:16px">
+  <button id="exportBtn">💾 Exportar</button>
+  <input type="file" id="importFile" style="display:none">
+  <button class="ghost" onclick="document.getElementById('importFile').click()">📂 Importar</button>
+  <button class="ghost" id="resetBtn">🔄 Restablecer</button>
+</div>
+
+<footer>
+  Todos los datos se guardan en tu navegador. Usa Exportar/Importar para respaldo.
+</footer>
 
 <script>
-/* --- Datos base extraídos de tu descripción --- */
-const DEFAULT = {
-  dates: { edictPublication: null, certificateIssue: null, ceremony: null },
-  budget: { salonCuba: 308.6, otros: [] },
-  notes: {},
-  sections: [
-    { id: "req-previos", title: "1) Requisitos previos", items: [
-      { id: "residencia", label: "Residencia: uno con DNI que muestre Jesús María", done:false },
-      { id: "tramite-personal", label: "Trámite personal (o carta poder simple en caso excepcional)", done:false },
-      { id: "solicitud-dj", label: "Solicitud - Declaración Jurada llenada y firmada", done:false },
-      { id: "cert-medico", label: "Certificado Médico Pre-matrimonial (vigencia 30 días)", done:false },
-      { id: "dos-testigos", label: "Dos testigos mayores con copia de DNI vigente", done:false },
-      { id: "docs-adicionales", label: "Documentos adicionales según el caso (partidas, certificados, dispensa si aplica)", done:false }
-    ]},
-    { id: "expediente", title: "2) Presentación del expediente", items: [
-      { id: "reunir-docs", label: "Reúne y presenta expediente en la Municipalidad", done:false },
-      { id: "edicto", label: "Publicación
+const STORAGE_KEY = "jm-checklist-v2";
+
+let state = {
+  tasks: {
+    req: [
+      "Residencia acreditada en DNI",
+      "Solicitud - Declaración Jurada firmada",
+      "Certificado médico (vigencia 30 días)",
+      "Dos testigos con DNI vigente",
+      "Documentos adicionales (partidas, dispensa)"
+    ],
+    exp: [
+      "Presentar expediente completo en Municipalidad",
+      "Publicación del Edicto (8 días)",
+      "Dispensa del Edicto (si aplica)",
+      "Control del plazo (4 meses)"
+    ],
+    res: [
+      "Reservar fecha tras los 8 días del edicto",
+      "Confirmar horario disponible (10:00–16:00)",
+      "Llegar 15 min antes (tolerancia 15 min)"
+    ]
+  },
+  status: {}, // estado de cada tarea
+  notes: {},  // notas de cada tarea
+  dates: { edict:null, cert:null, ceremony:null },
+  budget: []
+};
+
+// Cargar desde localStorage
+function load() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if(saved) state = JSON.parse(saved);
+}
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+// Render tareas
+function renderTasks(section) {
+  const root = document.getElementById(section+"Tasks");
+  root.innerHTML = "";
+  state.tasks[section].forEach((t,i)=>{
+    const id = section+"-"+i;
+    const status = state.status[id] || "pendiente";
+    const note = state.notes[id] || "";
+    root.innerHTML += `
+      <div class="task">
+        <span>✔️</span>
+        <select data-id="${id}">
+          <option ${status=="pendiente"?"selected":""}>pendiente</option>
+          <option ${status=="en proceso"?"selected":""}>en proceso</option>
+          <option ${status=="completo"?"selected":""}>completo</option>
+        </select>
+        <span style="flex:1;margin-left:8px">${t}</span>
+      </div>
+      <textarea data-note="${id}" placeholder="Notas...">${note}</textarea>
+    `;
+  });
+  // Listeners
+  root.querySelectorAll("select").forEach(sel=>{
+    sel.addEventListener("change",e=>{
+      state.status[e.target.dataset.id] = e.target.value;
+      save(); updateProgress();
+    });
+  });
+  root.querySelectorAll("textarea").forEach(ta=>{
+    ta.addEventListener("input",e=>{
+      state.notes[e.target.dataset.note] = e.target.value;
+      save();
+    });
+  });
+}
+
+// Progreso
+function updateProgress() {
+  ["req","exp","res"].forEach(sec=>{
+    const total = state.tasks[sec].length;
+    let done = 0;
+    state.tasks[sec].forEach((_,i)=>{
+      if(state.status[sec+"-"+i]=="completo") done++;
+    });
+    const pct = Math.round((done/total)*100);
+    document.getElementById(sec+"Progress").style.width = pct+"%";
+    document.getElementById(sec+"Progress").innerText = pct+"%";
+  });
+}
+
+// Presupuesto
+function renderBudget() {
+  const root = document.getElementById("budgetList");
+  root.innerHTML = "";
+  state.budget.forEach((b,i)=>{
+    root.innerHTML += `
+      <div class="budget-item">
+        <input type="text" data-concept="${i}" value="${b.concept}">
+        <input type="number" step="0.01" data-amount="${i}" value="${b.amount}">
+        <button data-del="${i}">🗑</button>
+      </div>
+    `;
+  });
+  let total = state.budget.reduce((a,b)=>a+Number(b.amount||0),0);
+  document.getElementById("totalBudget").innerText = total.toFixed(2);
+
+  root.querySelectorAll("input[data-concept]").forEach(inp=>{
+    inp.oninput = e=>{
+      state.budget[e.target.dataset.concept].concept = e.target.value;
+      save();
+    };
+  });
+  root.querySelectorAll("input[data-amount]").forEach(inp=>{
+    inp.oninput = e=>{
+      state.budget[e.target.dataset.amount].amount = parseFloat(e.target.value||0);
+      save(); renderBudget();
+    };
+  });
+  root.querySelectorAll("button[data-del]").forEach(btn=>{
+    btn.onclick = e=>{
+      state.budget.splice(e.target.dataset.del,1);
+      save(); renderBudget();
+    };
+  });
+}
+
+// Fechas y alertas
+function checkDates() {
+  const {edict,cert,ceremony} = state.dates;
+  let msg = "";
+  if(edict){
+    let edEnd = new Date(edict); edEnd.setDate(edEnd.getDate()+8);
+    msg += `✔ Edicto finaliza: ${edEnd.toLocaleDateString()}<br>`;
+  }
+  if(cert){
+    let certEnd = new Date(cert); certEnd.setDate(certEnd.getDate()+30);
+    if(ceremony && new Date(ceremony)>certEnd) msg += `<span class="alert">⚠ Certificado vencido antes de la ceremonia</span><br>`;
+  }
+  document.getElementById("alerts").innerHTML = msg;
+}
+
+// Eventos de fechas
+["edictDate","certDate","ceremonyDate"].forEach(id=>{
+  document.getElementById(id).onchange = e=>{
+    state.dates[id.replace("Date","")] = e.target.value;
+    save(); checkDates();
+  };
+});
+
+// Exportar / Importar
+document.getElementById("exportBtn").onclick = ()=>{
+  const blob = new Blob([JSON.stringify(state)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "matrimonio.json"; a.click();
+};
+document.getElementById("importFile").onchange = e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = ()=>{ state = JSON.parse(r.result); save(); init(); };
+  r.readAsText(file);
+};
+document.getElementById("resetBtn").onclick = ()=>{
+  if(confirm("¿Seguro quieres borrar todo?")){
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+};
+
+// Tabs
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.onclick = ()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById(tab.dataset.tab).classList.add("active");
+  };
+});
+
+// Inicializar
+function init(){
+  renderTasks("req");
+  renderTasks("exp");
+  renderTasks("res");
+  updateProgress();
+  renderBudget();
+  checkDates();
+  document.getElementById("addExpense").onclick = ()=>{
+    state.budget.push({concept:"",amount:0});
+    save(); renderBudget();
+  };
+  document.getElementById("edictDate").value = state.dates.edict || "";
+  document.getElementById("certDate").value = state.dates.cert || "";
+  document.getElementById("ceremonyDate").value = state.dates.ceremony || "";
+}
+load();
+init();
+</script>
+</body>
+</html>
