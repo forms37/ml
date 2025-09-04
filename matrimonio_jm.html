@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Checklist Matrimonio Civil - Jesús María</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:18px;background:#f7f7fb;color:#111}
+    .wrap{max-width:980px;margin:0 auto;background:#fff;padding:18px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    h1{margin:0 0 8px;font-size:20px}
+    h2{margin-top:18px;margin-bottom:8px;font-size:16px}
+    section{margin-bottom:12px}
+    label{display:block;margin:6px 0;font-size:14px}
+    input[type="date"],input[type="number"],input[type="text"]{padding:6px;border:1px solid #ccc;border-radius:6px}
+    .small{font-size:13px;color:#666}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    button{background:#0366d6;color:#fff;border:none;padding:8px 10px;border-radius:8px;cursor:pointer}
+    button.ghost{background:#efefef;color:#111}
+    .grid{display:grid;gap:8px}
+    .cols-2{grid-template-columns:1fr 1fr}
+    .card{border:1px solid #eee;padding:10px;border-radius:8px;background:#fafafa}
+    .task{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px dashed #eee}
+    .task:last-child{border-bottom:none}
+    textarea{width:100%;min-height:48px;border-radius:6px;padding:6px;border:1px solid #ddd}
+    .price{font-weight:600}
+    .right{text-align:right}
+    .muted{color:#666;font-size:13px}
+    .tiny{font-size:12px;color:#777}
+    .expenses-row{display:flex;gap:8px;align-items:center}
+    .btn-danger{background:#d9534f}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>📋 Planificador: Matrimonio Civil — Municipalidad de Jesús María</h1>
+    <p class="small">App simple que guarda en tu navegador (no sube nada). Puedes exportar/importar JSON para respaldo.</p>
+
+    <div class="controls">
+      <button id="exportBtn">Exportar (JSON)</button>
+      <label class="ghost btn-file" style="padding:0 8px;background:#efefef;border-radius:8px;display:inline-block;cursor:pointer">
+        <input id="importFile" type="file" accept=".json" style="display:none"> <span style="padding:8px 6px;display:inline-block">Importar</span>
+      </label>
+      <button id="resetBtn" class="btn-danger">Restablecer</button>
+    </div>
+
+    <section id="fechas" class="card">
+      <h2>Fechas clave</h2>
+      <div class="grid cols-2">
+        <label>Fecha de publicación del Edicto<br><input id="edictDate" type="date"></label>
+        <label>Fecha de emisión del Certificado médico<br><input id="certDate" type="date"></label>
+        <label>Fecha tentativa de la ceremonia<br><input id="ceremonyDate" type="date"></label>
+        <div>
+          <div class="muted tiny">Cálculos automáticos:</div>
+          <div id="computed" style="margin-top:6px"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="checklistSection">
+      <h2>Checklist</h2>
+      <div id="checklistRoot" class="card"></div>
+    </section>
+
+    <section id="budgetSection">
+      <h2>Presupuesto</h2>
+      <div class="card">
+        <label>Salón Cuba (S/.)<br><input id="salonCost" type="number" step="0.01" value="308.60"></label>
+        <div style="margin-top:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="muted">Otros gastos</div>
+            <button id="addExpense" class="ghost">Agregar</button>
+          </div>
+          <div id="expensesList" style="margin-top:8px"></div>
+          <div style="display:flex;justify-content:space-between;margin-top:10px;border-top:1px dashed #eee;padding-top:8px">
+            <div class="muted">Total estimado</div>
+            <div class="price" id="totalPrice">S/ 0.00</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="tiny muted" style="margin-top:12px">
+      Nota: la app guarda en <strong>este navegador y equipo</strong>. Si cambias de equipo o borras datos, sube/exporta el JSON para respaldar.
+    </footer>
+  </div>
+
+<script>
+/* --- Datos base extraídos de tu descripción --- */
+const DEFAULT = {
+  dates: { edictPublication: null, certificateIssue: null, ceremony: null },
+  budget: { salonCuba: 308.6, otros: [] },
+  notes: {},
+  sections: [
+    { id: "req-previos", title: "1) Requisitos previos", items: [
+      { id: "residencia", label: "Residencia: uno con DNI que muestre Jesús María", done:false },
+      { id: "tramite-personal", label: "Trámite personal (o carta poder simple en caso excepcional)", done:false },
+      { id: "solicitud-dj", label: "Solicitud - Declaración Jurada llenada y firmada", done:false },
+      { id: "cert-medico", label: "Certificado Médico Pre-matrimonial (vigencia 30 días)", done:false },
+      { id: "dos-testigos", label: "Dos testigos mayores con copia de DNI vigente", done:false },
+      { id: "docs-adicionales", label: "Documentos adicionales según el caso (partidas, certificados, dispensa si aplica)", done:false }
+    ]},
+    { id: "expediente", title: "2) Presentación del expediente", items: [
+      { id: "reunir-docs", label: "Reúne y presenta expediente en la Municipalidad", done:false },
+      { id: "edicto", label: "Publicación
