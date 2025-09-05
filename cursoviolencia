@@ -1,0 +1,76 @@
+<form id="quizForm">
+  <h2>Formulario Curso Villarreal Capacitación</h2>
+  
+  <label>Nombre Completo:</label><br>
+  <input type="text" name="nombre" required><br><br>
+  
+  <label>Correo:</label><br>
+  <input type="email" name="correo" required><br><br>
+  
+  <p>1. ¿El acoso escolar implica una agresión deliberada y repetida entre estudiantes con el fin de intimidar o excluir a otro?</p>
+  <input type="radio" name="p1" value="V" required> Verdadero
+  <input type="radio" name="p1" value="F"> Falso
+  
+  <p>2. ¿El ciberacoso solo ocurre a través de agresiones físicas directas?</p>
+  <input type="radio" name="p2" value="V" required> Verdadero
+  <input type="radio" name="p2" value="F"> Falso
+  
+  <p>3. ¿Los agresores suelen ser estudiantes que tienen una posición de poder o ventaja sobre sus víctimas?</p>
+  <input type="radio" name="p3" value="V" required> Verdadero
+  <input type="radio" name="p3" value="F"> Falso
+  
+  <p>4. ¿Un cambio repentino en el comportamiento de un estudiante puede ser señal de acoso escolar?</p>
+  <input type="radio" name="p4" value="V" required> Verdadero
+  <input type="radio" name="p4" value="F"> Falso
+  
+  <p>5. ¿El acoso escolar ocurre con mayor frecuencia en áreas sin supervisión?</p>
+  <input type="radio" name="p5" value="V" required> Verdadero
+  <input type="radio" name="p5" value="F"> Falso
+  
+  <p>6. ¿El fomento de la convivencia escolar y el respeto es clave para prevenir el acoso escolar?</p>
+  <input type="radio" name="p6" value="V" required> Verdadero
+  <input type="radio" name="p6" value="F"> Falso
+  
+  <p>7. ¿Las actividades de prevención del acoso deben adaptarse a la edad y nivel educativo?</p>
+  <input type="radio" name="p7" value="V" required> Verdadero
+  <input type="radio" name="p7" value="F"> Falso
+  
+  <p>8. ¿Las normas de convivencia deben ser elaboradas de manera participativa?</p>
+  <input type="radio" name="p8" value="V" required> Verdadero
+  <input type="radio" name="p8" value="F"> Falso
+  
+  <p>9. ¿Una intervención eficaz ante el acoso debe incluir identificación temprana, protección y seguimiento?</p>
+  <input type="radio" name="p9" value="V" required> Verdadero
+  <input type="radio" name="p9" value="F"> Falso
+  
+  <p>10. ¿Los Centros de Emergencia Mujer (CEM) ofrecen atención integral a víctimas de violencia escolar?</p>
+  <input type="radio" name="p10" value="V" required> Verdadero
+  <input type="radio" name="p10" value="F"> Falso
+  
+  <br><br>
+  <button type="submit">Enviar</button>
+</form>
+
+<div id="mensaje" style="display:none; text-align:center; padding:20px; font-weight:bold;">
+  ✅ ¡Gracias por participar en el Curso de Villarreal Capacitaciones y Asociación Lidera!
+</div>
+
+<script>
+  const scriptURL = "https://script.google.com/macros/s/AKfycbwudt5MXdHJYPvfrohANl0cGwy-m66PhoTHQcmsGn9JevPoTYBcoWO2UKaFaYrRIL2rWg/exec";
+  
+  document.getElementById("quizForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    fetch(scriptURL, {
+      method: "POST",
+      body: formData,
+      mode: "no-cors"   // 🔹 evita el error de CORS
+    })
+    .then(() => {
+      document.getElementById("quizForm").style.display = "none";
+      document.getElementById("mensaje").style.display = "block";
+    })
+    .catch(error => alert("Error al enviar: " + error.message));
+  });
+</script>
