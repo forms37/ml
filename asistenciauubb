@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INPE Digital - Control de Asistencia</title>
+    <style>
+        :root {
+            --primary: #d90429; --secondary: #2b2d42; --success: #38b000;
+            --accent: #0077b6; --bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1d3557 0%, #457b9d 100%);
+            margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh;
+        }
+
+        .card {
+            background: white; width: 95%; max-width: 420px; padding: 25px;
+            border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center;
+            box-sizing: border-box;
+        }
+
+        /* Estilo del Logo */
+        .logo-container {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .logo-inpe {
+            max-width: 220px; /* Tamaño optimizado para móviles */
+            height: auto;
+        }
+
+        .video-box {
+            width: 100%; border-radius: 20px; overflow: hidden; background: #000;
+            border: 4px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2); margin-bottom: 15px;
+        }
+        #video { width: 100%; display: block; transform: scaleX(-1); }
+
+        input[type="number"] {
+            width: 100%; padding: 15px; font-size: 28px; font-weight: bold;
+            border: 2px solid #ddd; border-radius: 15px; text-align: center; box-sizing: border-box;
+        }
+
+        .btn {
+            width: 100%; padding: 18px; border: none; border-radius: 15px;
+            font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 10px; color: white;
+            text-transform: uppercase;
+        }
+        .btn-photo { background: var(--accent); margin: 15px 0; }
+        
+        .selector-manual { display: none; gap: 10px; margin-top: 15px; animation: bounceIn 0.5s; }
+        .btn-ingreso { background: var(--success); flex: 1; }
+        .btn-salida { background: var(--primary); flex: 1; }
+
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: none; align-items: center;
+            justify-content: center; z-index: 1000; padding: 20px;
+        }
+        .popup {
+            background: white; padding: 30px; border-radius: 25px; width: 100%;
+            max-width: 350px; text-align: center; animation: scaleUp 0.3s forwards;
+        }
+        .dni-confirm { font-size: 35px; font-weight: 800; color: var(--secondary); margin: 15px 0; border-bottom: 2px solid #eee; }
+        
+        .icon-check {
+            width: 70px; height: 70px; background: var(--success); color: white;
+            font-size: 40px; line-height: 70px; border-radius: 50%; margin: 0 auto 15px;
+        }
+        .icon-check.salida { background: var(--primary); }
+
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes scaleUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="logo-container">
+        <img src="https://i.imgur.com/QLZWLHV.png" alt="Logo INPE" class="logo-inpe">
+    </div>
+    
+    <h3 style="margin:0; color:var(--secondary)">REGISTRO DIGITAL</h3>
+    <p style="margin-top:5px">Control de Asistencia Comunitaria</p>
+
+    <div class="video-box">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas" style="display:none;"></canvas>
+    </div>
+
+    <input type="number" id="dni" placeholder="INGRESE DNI" inputmode="numeric" oninput="validarDNI()">
+
+    <button type="button" class="btn btn-photo" onclick="hacerFoto()">📸 1. TOMAR FOTO</button>
+
+    <div id="opcionesManuales" class="selector-manual">
+        <button class="btn btn-ingreso" onclick="enviarDatos('INGRESO')">REGISTRAR INGRESO</button>
+        <button class="btn btn-salida" onclick="enviarDatos('SALIDA')">REGISTRAR SALIDA</button>
+    </div>
+</div>
+
+<div id="overlayDni" class="overlay">
+    <div class="popup">
+        <h3>&#191;Es correcto su DNI?</h3>
+        <div id="dniVer" class="dni-confirm">--------</div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn" style="background:#666; flex:1;" onclick="resetDni()">NO</button>
+            <button class="btn" style="background:var(--success); flex:2;" onclick="dniOk()">S&#205;, CORRECTO</button>
+        </div>
+    </div>
+</div>
+
+<div id="overlayFin" class="overlay">
+    <div class="popup">
+        <div id="iconFin" class="icon-check">✓</div>
+        <h3 id="tituloFin">&#161;REGISTRO EXITOSO!</h3>
+        <p>La informaci&#243;n ha sido enviada correctamente.</p>
+        <button class="btn" style="background:var(--secondary)" onclick="location.reload()">ENTENDIDO</button>
+    </div>
+</div>
+
+<script>
+    const URL_SCRIPT = "PON_AQUI_TU_URL_DE_GOOGLE_APPS_SCRIPT";
+    let coords = { lat: null, lon: null };
+    let fotoRealizada = false;
+    let dniConfirmado = false;
+    const video = document.getElementById('video');
+
+    window.onload = () => {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then(s => video.srcObject = s)
+            .catch(e => alert("Debe permitir el uso de la cámara para registrar su foto."));
+
+        navigator.geolocation.getCurrentPosition(
+            p => { coords.lat = p.coords.latitude; coords.lon = p.coords.longitude; },
+            e => alert("Debe activar el GPS. La ubicación es obligatoria."),
+            { enableHighAccuracy: true }
+        );
+    };
+
+    function validarDNI() {
+        const val = document.getElementById('dni').value;
+        if (val.length === 8 && !dniConfirmado) {
+            document.getElementById('dniVer').innerText = val;
+            document.getElementById('overlayDni').style.display = 'flex';
+        }
+    }
+
+    function resetDni() {
+        document.getElementById('dni').value = "";
+        document.getElementById('overlayDni').style.display = 'none';
+        dniConfirmado = false;
+    }
+
+    function dniOk() {
+        dniConfirmado = true;
+        document.getElementById('overlayDni').style.display = 'none';
+        verificarPasos();
+    }
+
+    function hacerFoto() {
+        const canvas = document.getElementById('canvas');
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        fotoRealizada = true;
+        alert("¡Foto capturada! ✅");
+        verificarPasos();
+    }
+
+    function verificarPasos() {
+        if (dniConfirmado && fotoRealizada) {
+            document.getElementById('opcionesManuales').style.display = 'flex';
+        }
+    }
+
+    async function enviarDatos(tipo) {
+        if (!coords.lat) return alert("Buscando señal GPS... Espere un momento.");
+        
+        document.getElementById('opcionesManuales').style.pointerEvents = 'none';
+        document.getElementById('opcionesManuales').style.opacity = '0.5';
+
+        let ip = "Desconocida";
+        try {
+            const resp = await fetch('https://api.ipify.org?format=json');
+            const data = await resp.json();
+            ip = data.ip;
+        } catch (e) {}
+
+        const payload = {
+            dni: document.getElementById('dni').value,
+            lat: coords.lat,
+            lon: coords.lon,
+            ip: ip,
+            foto: fotoRealizada,
+            tipo: tipo
+        };
+
+        fetch(URL_SCRIPT, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(payload)
+        })
+        .then(() => mostrarExito(tipo))
+        .catch(err => {
+            alert("Error de conexión. Intente nuevamente.");
+            document.getElementById('opcionesManuales').style.pointerEvents = 'auto';
+            document.getElementById('opcionesManuales').style.opacity = '1';
+        });
+    }
+
+    function mostrarExito(tipo) {
+        const icon = document.getElementById('iconFin');
+        const titulo = document.getElementById('tituloFin');
+        titulo.innerHTML = (tipo === 'INGRESO') ? "&#161;INGRESO EXITOSO!" : "&#161;SALIDA EXITOSA!";
+        icon.className = "icon-check " + (tipo === 'INGRESO' ? "" : "salida");
+        document.getElementById('overlayFin').style.display = 'flex';
+    }
+</script>
+
+</body>
+</html>
