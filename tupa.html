@@ -1,0 +1,263 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .header {
+    background: #1a3a6b;
+    color: white;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 2rem;
+  }
+  .header-logo {
+    width: 64px; height: 64px; background: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .header-logo i { font-size: 32px; color: #1a3a6b; }
+  .header-text h1 { font-size: 18px; font-weight: 500; margin-bottom: 2px; }
+  .header-text p { font-size: 14px; opacity: 0.85; font-weight: 400; }
+  .page-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-lg);
+    border: 0.5px solid var(--color-border-tertiary);
+  }
+  .page-title h2 { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 0.5rem; }
+  .badge {
+    display: inline-block;
+    background: #1a3a6b;
+    color: white;
+    font-size: 12px;
+    padding: 4px 14px;
+    border-radius: var(--border-radius-md);
+    margin-bottom: 1rem;
+  }
+  .info-card {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .info-card p { font-size: 15px; color: var(--color-text-secondary); line-height: 1.7; }
+  .doc-list { margin: 0.75rem 0 0 0; padding: 0; list-style: none; display: flex; gap: 12px; flex-wrap: wrap; }
+  .doc-list li {
+    display: flex; align-items: center; gap: 8px;
+    background: #e8f0fb; color: #0c447c;
+    padding: 6px 14px; border-radius: var(--border-radius-md);
+    font-size: 14px; font-weight: 500;
+  }
+  .doc-list li i { font-size: 16px; }
+  .steps {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px; margin-bottom: 2rem;
+  }
+  .step-card {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 1rem;
+    text-align: center;
+  }
+  .step-num {
+    width: 32px; height: 32px; border-radius: 50%; background: #1a3a6b;
+    color: white; font-size: 14px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;
+  }
+  .step-card i { font-size: 22px; color: #1a3a6b; display: block; margin-bottom: 6px; }
+  .step-card p { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; }
+  .section-title {
+    font-size: 16px; font-weight: 500; color: var(--color-text-primary);
+    margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;
+  }
+  .section-title i { font-size: 20px; color: #1a3a6b; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 8px 20px; border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    background: var(--color-background-primary);
+    color: var(--color-text-secondary);
+    font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .tab-btn.active {
+    background: #1a3a6b; color: white; border-color: #1a3a6b;
+  }
+  .tab-btn i { font-size: 16px; }
+  .form-panel { display: none; }
+  .form-panel.active { display: block; }
+  .form-wrapper {
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    background: var(--color-background-secondary);
+  }
+  .form-label {
+    padding: 10px 16px;
+    font-size: 13px; font-weight: 500;
+    color: #0c447c; background: #e8f0fb;
+    display: flex; align-items: center; gap: 6px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+  .form-label i { font-size: 16px; }
+  iframe { display: block; width: 100%; border: none; }
+  .upload-section {
+    margin-top: 2rem;
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+  }
+  .upload-header {
+    padding: 12px 16px;
+    background: #f0f7ee; color: #27500a;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+  .upload-header i { font-size: 20px; }
+  .upload-header span { font-size: 14px; font-weight: 500; }
+  .alert-box {
+    background: #faeeda; border: 0.5px solid #fac775;
+    border-radius: var(--border-radius-md);
+    padding: 10px 14px; margin-bottom: 1.5rem;
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 13px; color: #633806; line-height: 1.5;
+  }
+  .alert-box i { font-size: 18px; margin-top: 1px; flex-shrink: 0; }
+  .footer {
+    margin-top: 2.5rem; padding: 1.25rem;
+    border-top: 0.5px solid var(--color-border-tertiary);
+    text-align: center; font-size: 13px; color: var(--color-text-secondary);
+  }
+</style>
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;">Landing page de emisión de documentos TUPA - Instituto Nacional Penitenciario, Dirección de Medio Libre</h2>
+
+<div class="header">
+  <div class="header-logo">
+    <i class="ti ti-building-community" aria-hidden="true"></i>
+  </div>
+  <div class="header-text">
+    <h1>Instituto Nacional Penitenciario</h1>
+    <p>Dirección de Medio Libre</p>
+  </div>
+</div>
+
+<div class="page-title">
+  <div class="badge">TUPA - INPE</div>
+  <h2>Emisión de Documentos TUPA</h2>
+  <p style="font-size:14px; color:var(--color-text-secondary); margin-top:4px;">Trámites TUPA del Instituto Nacional Penitenciario</p>
+</div>
+
+<div class="info-card">
+  <p>En <strong>Medio Libre</strong> se emiten los siguientes documentos según el TUPA del INPE:</p>
+  <ul class="doc-list">
+    <li><i class="ti ti-certificate" aria-hidden="true"></i> Constancia de liberado</li>
+    <li><i class="ti ti-file-certificate" aria-hidden="true"></i> Certificado de conducta</li>
+  </ul>
+</div>
+
+<div class="alert-box">
+  <i class="ti ti-info-circle" aria-hidden="true"></i>
+  <span>Para generar estos documentos, el interesado debe presentar su solicitud y comprobante de pago en el Banco de la Nación. Una vez validados, se procede a la generación del documento.</span>
+</div>
+
+<div class="steps">
+  <div class="step-card">
+    <div class="step-num">1</div>
+    <i class="ti ti-file-text" aria-hidden="true"></i>
+    <p>Presenta tu solicitud en el Banco de la Nación</p>
+  </div>
+  <div class="step-card">
+    <div class="step-num">2</div>
+    <i class="ti ti-receipt" aria-hidden="true"></i>
+    <p>Obtén tu comprobante de pago</p>
+  </div>
+  <div class="step-card">
+    <div class="step-num">3</div>
+    <i class="ti ti-forms" aria-hidden="true"></i>
+    <p>Completa el formulario correspondiente</p>
+  </div>
+  <div class="step-card">
+    <div class="step-num">4</div>
+    <i class="ti ti-signature" aria-hidden="true"></i>
+    <p>Recibe y firma el documento generado</p>
+  </div>
+  <div class="step-card">
+    <div class="step-num">5</div>
+    <i class="ti ti-upload" aria-hidden="true"></i>
+    <p>Sube los documentos firmados al sistema</p>
+  </div>
+</div>
+
+<div class="section-title">
+  <i class="ti ti-forms" aria-hidden="true"></i>
+  Selecciona el tipo de documento a generar
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('liberado')" id="tab-liberado">
+    <i class="ti ti-certificate" aria-hidden="true"></i> Constancia de liberado
+  </button>
+  <button class="tab-btn" onclick="showTab('conducta')" id="tab-conducta">
+    <i class="ti ti-file-certificate" aria-hidden="true"></i> Certificado de conducta
+  </button>
+</div>
+
+<div id="panel-liberado" class="form-panel active">
+  <div class="form-wrapper">
+    <div class="form-label">
+      <i class="ti ti-certificate" aria-hidden="true"></i>
+      Formulario — Constancia de liberado
+    </div>
+    <iframe
+      src="https://docs.google.com/forms/d/e/1FAIpQLScXKWtd_CXPUZLbquYoViVPA5P8l9GQSRxyCE3I3HKxDf7DcA/viewform?embedded=true"
+      height="1678"
+      title="Formulario de constancia de liberado">Cargando…</iframe>
+  </div>
+</div>
+
+<div id="panel-conducta" class="form-panel">
+  <div class="form-wrapper">
+    <div class="form-label">
+      <i class="ti ti-file-certificate" aria-hidden="true"></i>
+      Formulario — Certificado de conducta
+    </div>
+    <iframe
+      src="https://docs.google.com/forms/d/e/1FAIpQLSdji823cIPLdKkizif9lJzCOPAI3-eimYdJGS0jnnt0iXdoBg/viewform?embedded=true"
+      height="1678"
+      title="Formulario de certificado de conducta">Cargando…</iframe>
+  </div>
+</div>
+
+<div class="upload-section" style="margin-top:2rem;">
+  <div class="upload-header">
+    <i class="ti ti-cloud-upload" aria-hidden="true"></i>
+    <span>Subir documentos firmados</span>
+  </div>
+  <div style="padding:1rem; font-size:14px; color:var(--color-text-secondary); line-height:1.6; border-bottom:0.5px solid var(--color-border-tertiary);">
+    Una vez que hayas firmado el documento, sube aquí la solicitud, el comprobante de pago y el documento firmado.
+  </div>
+  <iframe
+    src="AKfycbz4PcEuNCHnWDvhonCoIgm7wm8VWcQeSkpimijYw66SvcGSyAHGcCV7vtIjt2EPJDoy"
+    style="width:100%; height:700px; border:none;"
+    allow="camera"
+    title="Formulario de carga de documentos">Cargando formulario de carga…</iframe>
+</div>
+
+<div class="footer">
+  Instituto Nacional Penitenciario — Dirección de Medio Libre &nbsp;·&nbsp; Trámites TUPA oficiales
+</div>
+
+<script>
+  function showTab(id) {
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+</script>
